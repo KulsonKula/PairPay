@@ -1,0 +1,175 @@
+\documentclass[12pt,titlepage]{article}
+
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    total={210mm,297mm},
+    left=20mm,
+    right=20mm,
+    top=20mm,
+    bottom=20mm,
+}
+
+	
+\usepackage[]{subcaption}
+
+\usepackage{pdflscape}
+
+% Polski
+\usepackage[]{polski} 
+\usepackage[polish]{babel}
+
+%do tabel
+\usepackage{multirow}
+
+% Pierwszy akapit - wcięty
+\usepackage[]{indentfirst}
+
+% Matematyka
+\usepackage[]{amsfonts}
+
+\usepackage[]{amsmath}
+
+% Formatowanie
+\usepackage{ragged2e}
+
+% Tytuły sekcji
+\usepackage{titlesec}
+%\titleformat{\section}[block]{\Large\bfseries}{}{1em}{}
+
+% <=
+\usepackage{amssymb}
+
+% eps
+\usepackage{graphicx}
+% \usepackage{subfigure}
+
+% Tabele
+\usepackage{array}
+
+\usepackage[style=czech]{csquotes}
+
+\renewcommand*{\thesubsubsection}{}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\usepackage[numbered]{matlab-prettifier}
+\lstset{
+    literate={ą}{{\k{a}}}1
+    {Ą}{{\k{A}}}1
+    {ę}{{\k{e}}}1
+    {Ę}{{\k{E}}}1
+    {ó}{{\'o}}1
+    {Ó}{{\'O}}1
+    {ś}{{\'s}}1
+    {Ś}{{\'S}}1
+    {ł}{{\l{}}}1
+    {Ł}{{\L{}}}1
+    {ż}{{\.z}}1
+    {Ż}{{\.Z}}1
+    {ź}{{\'z}}1
+    {Ź}{{\'Z}}1
+    {ć}{{\'c}}1
+    {Ć}{{\'C}}1
+    {ń}{{\'n}}1
+    {Ń}{{\'N}}1
+}
+
+\title{
+\includegraphics[scale=0.75]{img/politechnika_sl_logo_bw_poziom_pl.eps}\\
+\textbf{Wydział Automatyki, Elektroniki\\
+i Informatyki}\\
+\vspace*{1cm}
+Technologie aplikacji internetowych \\ Projekt \\ PairPay
+
+\vspace*{5cm}
+}
+\author{
+Natalia Stręk,
+Jakub Kula,
+Paweł Wójtowicz
+} 
+\date{Gliwice 2024}
+
+\begin{document}
+
+\maketitle
+\newpage
+\section{Przedstawienie pomysłu na projektu}
+Aplikacja do zarządzania wydatkami została stworzona z myślą o osobach, które często dzielą się kosztami z innymi, na przykład podczas wspólnych wyjazdów, zakupów czy spotkań. Jej głównym celem jest uproszczenie procesu rejestrowania, śledzenia i rozliczania wydatków w grupach, co pozwala na efektywne zarządzanie finansami i uniknięcie nieporozumień związanych z podziałem kosztów.
+
+Użytkownicy mają możliwość rejestracji i logowania do systemu, co daje im dostęp do chronionych funkcji aplikacji. Aplikacja umożliwia tworzenie nowych rachunków, do których można dodawać wydatki oraz uczestników, a także automatycznie dzieli koszty na podstawie wprowadzonych danych. Dzięki funkcji skanowania paragonów, użytkownicy mogą łatwo zaciągać informacje o wydatkach bez potrzeby ręcznego wpisywania ich szczegółów.
+
+Aplikacja oferuje także możliwość edytowania i usuwania rachunków, a także przeglądania historii wydatków, co pozwala użytkownikom na pełną kontrolę nad ich finansami. Dodatkowo, implementacja opcji filtrowania i sortowania rachunków oraz etykietowania wydatków zwiększa użyteczność aplikacji, umożliwiając łatwe odnalezienie i zarządzanie danymi.
+
+Wszystkie te funkcjonalności czynią aplikację nieocenionym narzędziem dla osób, które pragną efektywnie zarządzać swoimi wydatkami i oszczędzać czas, jednocześnie minimalizując ryzyko błędów przy dzieleniu kosztów.
+
+\begin{landscape}
+
+\begin{table}[]
+    \resizebox{1.5\textwidth}{!}{
+        \begin{tabular}{|c|c|c|c|}
+            \hline
+            \textbf{Nr}    & \textbf{Nazwa}                                    & \textbf{Opis}                                                                                                                                                                                                        & \textbf{Kryterium odbioru}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     \\ \hline
+            \textbf{F\_1}  & Logowanie i rejestracja                           & \begin{tabular}[c]{@{}c@{}}Uzytkownik jest w stanie zakładać konto \\ oraz zalogować się na nie\end{tabular}                                                                                                         & \begin{tabular}[c]{@{}c@{}}Użytkownik musi mieć możliwość rejestracji i logowania do systemu,\\  a następnie uzyskać dostęp do chronionych funkcji aplikacji. \\ Przy każdej interakcji z chronionymi zasobami system musi sprawdzać tożsamość użytkownika.\\ Użytkownik musi mieć także możliwość wylogowania się, co kończy sesję i blokuje dostęp do tych zasobów.\end{tabular}                                                                                                                             \\ \hline
+            \textbf{F\_2}  & Tworzenie nowego rachunku                         & \begin{tabular}[c]{@{}c@{}}Użytkownik jest stanie zakładać nowy rachunek na którym \\ może dodawać kolejne przedmioty\\  oraz dodać osoby/grupę znajomych\\  którzy będą brać udział w podziale kosztów\end{tabular} & \begin{tabular}[c]{@{}c@{}}Użytkownik musi mieć możliwość wprowadzenia nazwy rachunku, dodania uczestników i szczegółów,\\  a następnie zapisania rachunku.\\  Rachunek musi być widoczny dla wszystkich dodanych uczestników, którzy mają do niego dostęp.\\  System musi poprawnie zapisywać dane rachunku oraz umożliwiać jego przeglądanie i edycję w przyszłości.\end{tabular}                                                                                                                            \\ \hline
+            \textbf{F\_3}  & Dodanie do rachunków nowych wydatków              & \begin{tabular}[c]{@{}c@{}}Aplikacja daj możliwość dodawania\\  nowych wydatków do istaniejących rachunków\end{tabular}                                                                                              & \begin{tabular}[c]{@{}c@{}}użytkownik musi mieć możliwość wprowadzenia szczegółów wydatku,\\  w tym kwoty, opisu oraz przypisania go do konkretnych uczestników rachunku. \\ System musi poprawnie zaktualizować saldo rachunku oraz widok wydatków, \\ aby wszyscy uczestnicy mogli zobaczyć nowo dodany wydatek.\\  Użytkownik musi również otrzymać potwierdzenie, że wydatek został pomyślnie dodany do rachunku.\end{tabular}                                                                             \\ \hline
+            \textbf{F\_4}  & Automatyczny podział kosztów                      & Aplikacja automatycznie dzieli koszty na wybranych użytkowników                                                                                                                                                      & \begin{tabular}[c]{@{}c@{}}system musi poprawnie obliczać i wyświetlać udział każdej osoby w rachunku na podstawie wprowadzonych wydatków \\ oraz przypisanych uczestników.\\  Użytkownik powinien mieć możliwość wyboru metody podziału (np. równy podział lub według indywidualnych udziałów)\\  i otrzymać szczegółowe podsumowanie, pokazujące, ile każda osoba jest winna.\\  System musi również aktualizować te informacje w czasie rzeczywistym po dodaniu nowych wydatków.\end{tabular}               \\ \hline
+            \textbf{F\_5}  & Automatyczne rozczytywanie informacji z paragonów & \begin{tabular}[c]{@{}c@{}}Aplikacja umożliwia wgranie zdjęcia paragonu,\\  z którego zostają zczytane informajce o kosztach\end{tabular}                                                                            & \begin{tabular}[c]{@{}c@{}}system musi być w stanie zidentyfikować i \\ wydobyć kluczowe dane z zeskanowanego paragonu, takie jak datę zakupu, kwotę całkowitą oraz szczegóły poszczególnych wydatków. \\ Użytkownik powinien mieć możliwość przesłania obrazu paragonu,\\  a system musi poprawnie rozpoznać i zapisać te informacje w odpowiednich polach rachunku.\\  Dodatkowo, użytkownik powinien otrzymać potwierdzenie, że dane zostały pomyślnie odczytane i dodane do rachunku.{]}\end{tabular}      \\ \hline
+            \textbf{F\_6}  & Tworzenie grup znajomych                          & \begin{tabular}[c]{@{}c@{}}W celu sprawniejszego korzystania z funkcjonalności F\_2,\\  zostanie dodana możliwość zapisywania grup osób\\  z którymi często użytkownik wchodzi w interakcje\end{tabular}             & \begin{tabular}[c]{@{}c@{}}użytkownik musi mieć możliwość utworzenia nowej grupy, nadając jej nazwę oraz dodając członków z listy znajomych.\\  System powinien umożliwiać edytowanie i usuwanie grup, a także wyświetlać wszystkie grupy, do których użytkownik należy.\\  Dodatkowo, użytkownik powinien otrzymać potwierdzenie, że grupa została pomyślnie utworzona,\\  a wszyscy dodani członkowie zostaną powiadomieni o swojej przynależności do grupy.\end{tabular}                                    \\ \hline
+            \textbf{F\_7}  & Edytowanie i usuwanie rachunku                    & \begin{tabular}[c]{@{}c@{}}Apliakcja umożlwia  użytkownikom edytowanie\\  szczegółów rachunków i usuwania ich.\end{tabular}                                                                                          & \begin{tabular}[c]{@{}c@{}}użytkownik musi mieć możliwość wyboru istniejącego rachunku i wprowadzenia zmian w jego szczegółach,\\  takich jak nazwa, uczestnicy czy wydatki.\\  System powinien poprawnie zapisać wprowadzone zmiany oraz wyświetlić zaktualizowane informacje o rachunku.\\  Ponadto, użytkownik powinien mieć możliwość usunięcia rachunku,\\  a system musi potwierdzić tę operację i usunąć rachunek z bazy danych oraz poinformować wszystkich uczestników o jego usunięciu.\end{tabular} \\ \hline
+            \textbf{F\_8}  & Historia rachunków                                & \begin{tabular}[c]{@{}c@{}}Aplikacja zapisuje poprzednie rachunki.\\  Umożliwia przeglądanie historii rachunków.\end{tabular}                                                                                        & \begin{tabular}[c]{@{}c@{}}użytkownik musi mieć możliwość wyświetlenia listy wszystkich wcześniej utworzonych rachunków, z informacjami takimi jak nazwa rachunku,\\  data utworzenia oraz uczestnicy a także zapewnić możliwość przeglądania szczegółów kazdego rachunku\end{tabular}                                                                                                                                                                                                                         \\ \hline
+            \textbf{F\_9}  & Filtacja i stortowanie rachunków                  & \begin{tabular}[c]{@{}c@{}}Aplikacja umożliwia filtrowanie \\ i sortowanie według różnych kryteriów\end{tabular}                                                                                                     & \begin{tabular}[c]{@{}c@{}}użytkownik musi mieć możliwość zastosowania różnych kryteriów filtracji, takich jak data, uczestnicy,\\  kwota ystem powinien poprawnie aktualizować widok rachunków w zależności od wybranych filtrów,\\  aby użytkownik mógł łatwo znaleźć konkretne rachunki. \\ Dodatkowo, użytkownik powinien mieć możliwość sortowania rachunków według wybranych kryteriów (np. rosnąco lub malejąco),\\  co ułatwi mu przeglądanie historii rachunków.\end{tabular}                         \\ \hline
+            \textbf{F\_10} & Etykietowanie rachunków                           & \begin{tabular}[c]{@{}c@{}}Aplikacja umożliwia przypisanie do danego wydatku jego etykiety \\ określającej jego typ np: rozrywka, transport, dom\end{tabular}                                                        &                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \\ \hline
+        \end{tabular}
+        }
+    \end{table}
+    
+    \begin{table}[]
+        \resizebox{1.5\textwidth}{!}{
+        \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{NP}    & \textbf{Nazwa} & \textbf{Opis}                                                                                                                                                                                                                                           \\ \hline
+        \textbf{NF\_1} & Wydajność      & Aplikacja powinna ładować strony i przeprowadzać operacje, aby zapewnić płynne doświadczenie użytkownika.                                                                                                                                               \\ \hline
+        \textbf{NF\_2} & Bezpieczeństwo & System musi zapewniać szyfrowanie danych użytkowników zarówno w trakcie przesyłania, jak i w spoczynku.                                                                                                                                                 \\ \hline
+        \textbf{NF\_3} & Użyteczność:   & \begin{tabular}[c]{@{}c@{}}Interfejs użytkownika musi być prosty i intuicyjny, z jasnymi instrukcjami dotyczącymi dodawania rachunków,\\  etykietowania i podziału kosztów, aby zminimalizować krzywą uczenia się dla nowych użytkowników.\end{tabular} \\ \hline
+        \textbf{NF\_4} & Dokumentacja:  & Powinna istnieć szczegółowa dokumentacja dla użytkowników i administratorów, opisująca wszystkie funkcje oraz procedury korzystania z aplikacji.                                                                                                        \\ \hline
+        \end{tabular}
+        }
+        \end{table}    
+    
+\end{landscape}
+
+\section{Skala MoSCow}
+\begin{center}
+    \centering
+    \begin{table}[!h]
+        \begin{tabular}{|c|c|}
+            \hline
+            \textbf{Funkcjonalność} & \textbf{Skalda MoSCoW} \\ \hline
+            F\_1                    & Must                   \\ \hline
+            F\_2                    & Must                   \\ \hline
+            F\_3                    & Must                   \\ \hline
+            F\_4                    & Should                 \\ \hline
+            F\_5                    & Could                  \\ \hline
+            F\_6                    & Should                 \\ \hline
+            F\_7                    & Should                 \\ \hline
+            F\_8                    & Should                 \\ \hline
+            F\_9                    & Could                  \\ \hline
+            F\_10                   & Could                  \\ \hline
+            NF\_1                   & Must                   \\ \hline
+            NF\_2                   & Must                   \\ \hline
+            NF\_3                   & Should                 \\ \hline
+            NF\_4                   & Could                  \\ \hline
+        \end{tabular}
+    \end{table}
+\end{center}
+
+    \end{document}
