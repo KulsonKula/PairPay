@@ -1,0 +1,129 @@
+\documentclass[12pt,titlepage]{article}
+
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    total={210mm,297mm},
+    left=20mm,
+    right=20mm,
+    top=20mm,
+    bottom=20mm,
+}
+
+	
+\usepackage[]{subcaption}
+
+\usepackage{pdflscape}
+
+% Polski
+\usepackage[]{polski} 
+\usepackage[polish]{babel}
+
+%do tabel
+\usepackage{multirow}
+
+% Pierwszy akapit - wcięty
+\usepackage[]{indentfirst}
+
+% Matematyka
+\usepackage[]{amsfonts}
+
+\usepackage[]{amsmath}
+
+% Formatowanie
+\usepackage{ragged2e}
+
+% Tytuły sekcji
+\usepackage{titlesec}
+%\titleformat{\section}[block]{\Large\bfseries}{}{1em}{}
+
+% <=
+\usepackage{amssymb}
+
+% eps
+\usepackage{graphicx}
+% \usepackage{subfigure}
+
+% Tabele
+\usepackage{array}
+
+\usepackage[style=czech]{csquotes}
+
+\renewcommand*{\thesubsubsection}{}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\usepackage[numbered]{matlab-prettifier}
+\lstset{
+    literate={ą}{{\k{a}}}1
+    {Ą}{{\k{A}}}1
+    {ę}{{\k{e}}}1
+    {Ę}{{\k{E}}}1
+    {ó}{{\'o}}1
+    {Ó}{{\'O}}1
+    {ś}{{\'s}}1
+    {Ś}{{\'S}}1
+    {ł}{{\l{}}}1
+    {Ł}{{\L{}}}1
+    {ż}{{\.z}}1
+    {Ż}{{\.Z}}1
+    {ź}{{\'z}}1
+    {Ź}{{\'Z}}1
+    {ć}{{\'c}}1
+    {Ć}{{\'C}}1
+    {ń}{{\'n}}1
+    {Ń}{{\'N}}1
+}
+
+\title{
+\includegraphics[scale=0.75]{img/politechnika_sl_logo_bw_poziom_pl.eps}\\
+\textbf{Wydział Automatyki, Elektroniki\\
+i Informatyki}\\
+\vspace*{1cm}
+Technologie aplikacji internetowych \\ Projekt \\ PairPay
+
+\vspace*{5cm}
+}
+\author{
+Natalia Stręk,\\
+Jakub Kula,\\
+Paweł Wójtowicz
+} 
+\date{Gliwice 2024}
+
+\begin{document}
+
+\maketitle
+\newpage
+\section{Architektura}
+Przeanalizuj, jak zrealizować wymagania od strony technicznej. Jakie komponenty składają się na system? Czy będzie to jeden serwer czy kilka? Jakie technologie będą używane?
+\begin{enumerate}
+    \item Architektóra serwera: mikroserwisy -
+    \item Architektóra API: RESTful - 
+    \item Modele skalowaności - kubernetes ???????????????????????
+    \item Zarządzanie stanem - ???????????????????????????
+    \item Chmura i infrastryktura - ??????????????
+\end{enumerate}
+
+\subsection{Diagram komponentów}
+\subsection{Diagram sekwencji}
+\section{Użyte technologie w projekcie}
+\begin{enumerate}
+    \item Python, Flask - Flask jest jednym z czterech największych frameworków backendowych w Pythonie, wyróżniającym się szybkością wdrażania oraz skalowalnością. Jednym z istotnych atutów Flask jest jego rozbudowana i aktywna społeczność, co sprawia, że w razie potrzeby łatwo jest znaleźć pomoc i zasoby wspierające rozwój projektu. Dzięki temu framework ten idealnie nadaje się do tworzenia małych i średnich projektów, umożliwiając szybkie prototypowanie i iterację. Istotnym elementem jest także to, że Flask bazuje na Pythonie – języku programowania znanym ze swojej czytelności oraz obszernego ekosystemu bibliotek i narzędzi. Python, będący jednym z najłatwiejszych do nauki języków, oferuje jednocześnie szerokie możliwości przetwarzania danych, co stanowi istotną zaletę w kontekście projektów wymagających analiz i przetwarzania informacji.
+    \item BAZA danych
+    \item FRONT END
+\end{enumerate}
+\section{Bezpiczeństwo}
+\subsection{Zabezpieczenia logowania i autoryzacji}
+\subsection{Zarządzanie sesjami}
+\subsection{Zabezpieczenia bazy danych}
+\subsection{Zarządzanie dostępem}
+
+    \end{document}
