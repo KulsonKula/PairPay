@@ -102,15 +102,32 @@ Paweł Wójtowicz
 
 \maketitle
 \newpage
-\section{Architektura}
+\section{Komponenty systemu}
 Przeanalizuj, jak zrealizować wymagania od strony technicznej. Jakie komponenty składają się na system? Czy będzie to jeden serwer czy kilka? Jakie technologie będą używane?
-\begin{enumerate}
-    \item Architektóra serwera: mikroserwisy -
-    \item Architektóra API: RESTful - 
-    \item Modele skalowaności - kubernetes ???????????????????????
-    \item Zarządzanie stanem - ???????????????????????????
-    \item Chmura i infrastryktura - ??????????????
-\end{enumerate}
+\subsection{Backend - REST API}
+\begin{itemize}
+    \item Technologie: Python z frameworkiem Flask
+    \item Uzasadnienie: Flask jest oparty o język Python, co umożliwia korzystanie z jego licznych zalet. To lekki framework, który umożliwia szybkie tworzenie aplikacji backendowych. Daje pełną elastyczność w projektowaniu różnych rozwiązań. Jest idealny do tworzenia REST API i umożliwia łatwą integrację między frontendem a backendem. Kolejnym ważym argumentem jest jego wsparcie dla OAuth, co pozwala zapewnić bezpieczne logowanie i autoryzację użytkowników. Kolejnym ważnym aspektem jest to, że Flask świetnie wsółdziała z takimi bibliotekami jak SQLAlchemy czy Tortoise ORM, co znacznie upraszcza operacje na bazie danych i tworzenie powiązań między tabelami. Ogromną zaletą Flaska jest również wsparcie społeczności i rozbudowana dokumentacja, która umożliwi szybkie znalezienie rozwiązań na różne problemy.
+\end{itemize}
+
+\subsection{Frontend}
+\begin{itemize}
+    \item Technologie: TypeScript, React
+    \item Uzasadnienie: React to popularna biblioteka do budowy interfejsów użytkownika, która pozwala na tworzenie dynamicznych i responsywnych aplikacji webowych. Dzięki zastosowaniu komponentów można łatwo zarządzać stanem aplikacji oraz ponownie wykorzystywać kod, co znacząco przyspiesza proces developmentu. React oferuje także wirtualny DOM, co przyczynia się do wydajności aplikacji, umożliwiając szybkie aktualizacje UI bez obciążania przeglądarki. Co więcej dostępne jest duża ilość bibliotek z gotowymi komponentami UI (NextUI, Shadcn, itp) pozwala to na dojść szybki i prosty sposób tworzenia elementów interfejsów użytkownika, dzięki czemu przyśpieszy to proces developmentu.
+\end{itemize}
+
+\subsection{Baza danych}
+\begin{itemize}
+    \item Technologie: PostgreSQL
+    \item Uzasadnienie: 
+\end{itemize}
+
+\subsection{Development}
+\begin{itemize}
+    \item Technologie: Git (GitHub) oraz CI/CD (GitHub Actions) ??TODO docker-compose i zastanowic sie czy to dac
+    \item Uzasadnienie: Umożliwiaja monitorowanie zmian w kodzie, co pozwala na łatwe śledzenie postępów w projekcie oraz ułatwia pracę zespołową poprzez wykorzystanie branchy do izolacji pracy nad różnymi funkcjonalnościami aplikacji, co zmniejsza ryzyko konfliktów w kodzie. GitHub Actions, jako narzędzie wbudowane w GitHub, automatyzuje procesy \\ CI/CD bezpośrednio w repozytoriach i oferuje elastyczność w definiowaniu potoków \\ CI/CD w plikach YAML. 
+\end{itemize}
+
 
 \subsection{Diagram komponentów}
 \subsection{Diagram sekwencji}
