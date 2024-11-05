@@ -233,7 +233,14 @@ Podczas organizacji domowej imprezy grupa znajomych ustaliła, że złożą się
 \newpage
 
 \section{Diagram przypadków użycia}
-\includegraphics[width=1\textwidth]{UserDiagram.png}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{img/UserDiagram.png}
+    \caption{Diagram przypadków użycia}
+    \label{fig:mesh1}
+\end{figure}
+
+
 \newpage
 \section{Komponenty systemu}
 \subsection{Backend - REST API}
@@ -262,10 +269,29 @@ Podczas organizacji domowej imprezy grupa znajomych ustaliła, że złożą się
 
 
 \subsection{Diagram komponentów}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=1\textwidth]{img/Digram_komponentów.pdf}
+    \caption{Diagram komponentów}
+    \label{fig:mesh1}
+\end{figure}
+\newpage
 \subsection{Diagram sekwencji}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=1\textwidth]{img/Diagram sekwencji.pdf}
+    \caption{Diagram sekwencji}
+    \label{fig:mesh1}
+\end{figure}
+
 \section{Bezpiczeństwo}
 \subsection{Zabezpieczenia logowania i autoryzacji Zarządzanie sesjami}
-Mechanizmy uwierzytelniania: Rozważ użycie protokołów takich jak OAuth 2.0
+\begin{itemize}
+    \item Technologie: OAuth 2.0
+    \item Uzasadnienie: Używa ona tokenów dostępu, które są wymieniane między klientem a serwerem. Wykorzystanie tej technologii pozwala ominąć przekazywanie danych wrażliwych między klientem a serwerem, co zmniejsza ryzyko wycieku danych. OAuth 2.0 umożliwia także zarządzanie sesją użytkownika. Przy każdym żądaniu klient przesyła token dostępu, co pozwala serwerowi identyfikować użytkownika i autoryzować sesję.
+\end{itemize}
 \subsection{Zabezpieczenia bazy danych}
 \begin{itemize}
     \item Wrażliwe dane zostaną zaszyfrowane za pomocą bcrypt (szyfrowanie haseł) i AES (szyfrowanie innych danych wrażliwych),
@@ -273,7 +299,6 @@ Mechanizmy uwierzytelniania: Rozważ użycie protokołów takich jak OAuth 2.0
 \end{itemize}
 
 \subsection{Zarządzanie dostępem}
-Stworzenie ról typu admin, użytkownik które posiadają odpowiednie uprawnienia.
-
+W celu zarządzania dostępem zostaną utworzone odpowiednie role, takie jak administrator i użytkownik, które będą posiadały właściwe uprawnienia i dostęp do zasobów. Przykładowo, administrator będzie miał dostęp do logów serwerowych oraz do historii wszystkich użytkowników, natomiast pojedynczy użytkownik będzie miał dostęp wyłącznie do informacji o swoim koncie.
 
 \end{document}
