@@ -207,6 +207,12 @@ _minted*
 *.nlo
 *.nls
 
+
+
+__pycache__/
+
+*__pycache__/
+
 # pax
 *.pax
 
@@ -324,3 +330,4 @@ TSWLatexianTemp*
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
+

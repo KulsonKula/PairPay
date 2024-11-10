@@ -1,7 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
-from sqlalchemy_utils import EmailType
-from sqlalchemy.sql import func
-from app.db import Base
+from .imports import *
 
 
 class user(Base):
@@ -14,3 +11,5 @@ class user(Base):
     password_hash = Column(String, nullable=False)
     admin = Column(Boolean, default=0)
     created_at = Column(DateTime, server_default=func.now())
+
+    logs = relationship("Log", back_populates="user")

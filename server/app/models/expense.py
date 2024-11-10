@@ -1,6 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
-from sqlalchemy.sql import func
-from app.db import Base
+from .imports import *
 
 
 class expense(Base):
