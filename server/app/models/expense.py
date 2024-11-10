@@ -8,3 +8,5 @@ class expense(Base):
     name = Column(String, nullable=False)
     currency = Column(Integer, nullable=False)
     price = Column(Float, nullable=False)
+
+    bills = relationship("bill", back_populates="expense")

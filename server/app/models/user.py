@@ -12,4 +12,10 @@ class user(Base):
     admin = Column(Boolean, default=0)
     created_at = Column(DateTime, server_default=func.now())
 
-    log = relationship("log", back_populates="user")
+    logs = relationship("log", back_populates="user")
+    bills_created = relationship(
+        "bill", foreign_keys="[bill.user_creator_id]", back_populates="user_creator")
+    bills_added = relationship(
+        "bill", foreign_keys="[bill.user_added_id]", back_populates="user_added")
+    groups_led = relationship("group", back_populates="leader")
+    groups_member = relationship("group", back_populates="members")
