@@ -9,7 +9,10 @@ class group(Base):
     user_member = Column(Integer, ForeignKey("user.id"))
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
-    leader = relationship("user", foreign_keys=[
-                          user_lider], back_populates="groups_led")
-    members = relationship("user", foreign_keys=[
-                           user_member], back_populates="groups_member")
+ # Relacja z liderem (user_lider) w tabeli user
+    lider = relationship("user", back_populates="groups_led",
+                         foreign_keys=[user_lider])
+
+    # Relacja z członkiem (user_member) w tabeli user
+    member = relationship(
+        "user", back_populates="groups_member", foreign_keys=[user_member])
