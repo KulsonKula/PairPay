@@ -213,7 +213,7 @@ __pycache__/
 
 *__pycache__/
 
-*.db
+.db
 
 # pax
 *.pax

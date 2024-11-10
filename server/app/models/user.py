@@ -12,4 +12,4 @@ class user(Base):
     admin = Column(Boolean, default=0)
     created_at = Column(DateTime, server_default=func.now())
 
-    logs = relationship("Log", back_populates="user")
+    log = relationship("log", back_populates="user")
