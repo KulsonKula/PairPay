@@ -1,0 +1,39 @@
+Table users {
+  "id" int [primary key]
+  "name" string
+  "surname" string
+  "mail" string
+  "password" string
+  "admin" bool
+}
+
+Table log{
+  "id" int [primary key]
+  "user_id" int 
+  "data" string
+  "created_at" timestamp
+}
+
+Table bill{
+  "id" int [primary key]
+  "user_added_id" int
+  "user_creator_id" int
+  "expense_id" int
+  "name" string
+  "total_sum" float
+  "label" int
+  "created_at" timestamp
+}
+
+Table expense{
+  "id" int [primary key]
+  "name" string
+  "currency?????????????" int 
+  "price" float
+}
+
+
+Ref: users.id < bill.user_creator_id
+Ref: users.id <> bill.user_added_id
+Ref: log.user_id - users.id
+Ref: bill.expense_id < expense.id
