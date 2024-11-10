@@ -33,8 +33,19 @@ Table expense{
   "price" float
 }
 
+Table group{
+  "id" int [primary key]
+  "lider_id" int
+  "member_id" int
+  "created_at" timestamp
+}
+
+
+
+Ref: users.id - group.lider_id
+Ref: users.id <> group.member_id
 
 Ref: users.id < bill.user_creator_id
 Ref: users.id <> bill.user_added_id
-Ref: log.user_id - users.id
+Ref: log.user_id <>  users.id
 Ref: bill.expense_id < expense.id
