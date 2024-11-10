@@ -22,6 +22,7 @@ Table bill{
   "name" string
   "total_sum" float
   "label" int
+  "status" int
   "created_at" timestamp
 }
 
