@@ -5,6 +5,7 @@ from app.config import config_by_name
 from app.db.db_init import init_db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from app.routes.bill_api import bill_bp
 
 
 def create_app():
@@ -16,6 +17,9 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": app.config['CORS_ORIGINS'],
                                  "methods": app.config['CORS_METHODS'],
                                  "allow_headers": app.config['CORS_ALLOW_HEADERS']}})
+
+    # TODO only for test purposes, delete it after, think a way to create maybe a class that registers blueprints or just get rid of it
+    app.register_blueprint(bill_bp)
 
     init_db()
 

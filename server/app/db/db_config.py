@@ -8,7 +8,3 @@ Base = declarative_base()
 engine = create_engine(Config.DATABASE_URI)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db_engine():
-    return engine
