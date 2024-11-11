@@ -1,5 +1,7 @@
-from .imports import *
-from app.db import Base
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, Integer
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from app.db.db_config import Base
 
 
 class Group(Base):
