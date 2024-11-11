@@ -1,7 +1,7 @@
 from .imports import *
 
 
-class log(Base):
+class Log(Base):
     __tablename__ = 'log'
 
     id = Column(Integer, primary_key=True, index=True)
@@ -9,4 +9,4 @@ class log(Base):
     data = Column(String, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
-    user = relationship("user", back_populates="log")
+    user = relationship("User", back_populates="log")

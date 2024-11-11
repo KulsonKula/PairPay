@@ -1,21 +1,28 @@
+from app import create_app
 
-import cv2
-from PIL import Image
-import pytesseract
-import os
-import ollama
-import numpy as np
+from flask import Flask, jsonify
+from app import create_app, get_db_engine
+from sqlalchemy.exc import OperationalError
 
-from flask import Flask, jsonify, request
-from app.config_cors import configure_cors
-from app.db import init_db
+app = create_app()
 
-app = Flask(__name__)
 
-# Konfiguracja CORS
-configure_cors(app)
+# This route is used to test DB connection
+@app.route('/test-db', methods=['GET'])
+def test_db_connection():
+    try:
+        engine = get_db_engine(app)
 
-init_db()
+        # Try to connect to the database and execute a simple query
+        with engine.connect() as connection:
+            connection.execute("SELECT 1")  # Simple query to check connection
+
+        return jsonify(message="Database is connected and working properly."), 200
+
+    except OperationalError as e:
+        # Handle connection error
+        return jsonify(message="Database connection failed.", error=str(e)), 500
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

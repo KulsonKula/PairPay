@@ -1,7 +1,11 @@
-from .imports import *
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, Boolean
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from sqlalchemy_utils import EmailType
+from app.db.db_config import Base
 
 
-class expense(Base):
+class Expense(Base):
     __tablename__ = 'expense'
 
     id = Column(Integer, primary_key=True, index=True)
@@ -9,4 +13,4 @@ class expense(Base):
     currency = Column(Integer, nullable=False)
     price = Column(Float, nullable=False)
 
-    bills = relationship("bill", back_populates="expense")
+    bills = relationship("Bill", back_populates="expense")

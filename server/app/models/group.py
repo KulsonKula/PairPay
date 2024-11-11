@@ -1,7 +1,8 @@
 from .imports import *
+from app.db import Base
 
 
-class group(Base):
+class Group(Base):
     __tablename__ = 'group'
 
     id = Column(Integer, primary_key=True, index=True)
@@ -9,10 +10,7 @@ class group(Base):
     user_member = Column(Integer, ForeignKey("user.id"))
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
- # Relacja z liderem (user_lider) w tabeli user
-    lider = relationship("user", back_populates="groups_led",
+    lider = relationship("User", back_populates="groups_led",
                          foreign_keys=[user_lider])
-
-    # Relacja z członkiem (user_member) w tabeli user
     member = relationship(
-        "user", back_populates="groups_member", foreign_keys=[user_member])
+        "User", back_populates="groups_member", foreign_keys=[user_member])

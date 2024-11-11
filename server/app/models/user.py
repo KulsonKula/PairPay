@@ -1,7 +1,11 @@
-from .imports import *
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, Boolean
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from sqlalchemy_utils import EmailType
+from app.db.db_config import Base
 
 
-class user(Base):
+class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, index=True)
@@ -13,16 +17,20 @@ class user(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     bills_created = relationship(
-        "bill", foreign_keys="[bill.user_creator_id]", back_populates="user_creator")
+        "Bill", foreign_keys="[Bill.user_creator_id]", back_populates="user_creator"
+    )
     bills_added = relationship(
-        "bill", foreign_keys="[bill.user_added_id]", back_populates="user_added")
+        "Bill", foreign_keys="[Bill.user_added_id]", back_populates="user_added"
+    )
 
     # Relacja z group jako lider
     groups_led = relationship(
-        "group", back_populates="lider", foreign_keys="[group.user_lider]")
+        "Group", back_populates="lider", foreign_keys="[Group.user_lider]"
+    )
 
     # Relacja z group jako członek
     groups_member = relationship(
-        "group", back_populates="member", foreign_keys="[group.user_member]")
+        "Group", back_populates="member", foreign_keys="[Group.user_member]"
+    )
 
-    log = relationship("log", back_populates="user")
+    log = relationship("Log", back_populates="user")
