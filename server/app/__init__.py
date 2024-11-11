@@ -6,7 +6,7 @@ from app.db.db_config import Database, Base
 from app.routes.bill_api import bill_bp
 from app.db.db_init import init_db
 
-# TODO przeniesc do inego pliku?
+# TODO pw przeniesc do inego pliku?
 
 
 class AppFactory:

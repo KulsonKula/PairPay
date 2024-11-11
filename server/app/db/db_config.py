@@ -14,7 +14,7 @@ class Database:
     def _get_engine(self):
         if not self._engine:
             self._engine = create_engine(
-                self.config["DATABASE_URL"], pool_size=10, max_overflow=20)
+                self.config["DATABASE_URI"], pool_size=10, max_overflow=20)
         return self._engine
 
     def get_session(self):
