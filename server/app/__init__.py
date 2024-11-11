@@ -2,35 +2,44 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from app.config import config_by_name
-from app.db.db_init import init_db
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from app.db.db_config import Database, Base
 from app.routes.bill_api import bill_bp
+from app.db.db_init import init_db
+
+# TODO przeniesc do inego pliku?
 
 
-def create_app():
-    app = Flask(__name__)
+class AppFactory:
+    def __init__(self, config_name="development"):
+        self.config_name = config_name
+        self.app = Flask(__name__)
 
-    config_name = os.getenv("FLASK_ENV", "development")
-    app.config.from_object(config_by_name[config_name])
+    def _load_config(self):
+        self.app.config.from_object(config_by_name.get(
+            self.config_name, config_by_name["development"]))
 
-    CORS(app, resources={r"/*": {"origins": app.config['CORS_ORIGINS'],
-                                 "methods": app.config['CORS_METHODS'],
-                                 "allow_headers": app.config['CORS_ALLOW_HEADERS']}})
+    def _initialize_cors(self):
+        CORS(self.app, resources={r"/*": {"origins": self.app.config['CORS_ORIGINS'],
+                                          "methods": self.app.config['CORS_METHODS'],
+                                          "allow_headers": self.app.config['CORS_ALLOW_HEADERS']}})
 
-    # TODO only for test purposes, delete it after, think a way to create maybe a class that registers blueprints or just get rid of it
-    app.register_blueprint(bill_bp)
+    def _register_blueprints(self):
+        self.app.register_blueprint(bill_bp)
 
-    init_db()
+    def _initialize_db(self):
+        self.app.db = Database(self.app.config)
+        Base.metadata.create_all(bind=self.app.db.get_engine())
+        with self.app.app_context():
+            init_db()
 
-    return app
+    def create_app(self):
+        self._load_config()
+        self._initialize_cors()
+        self._initialize_db()
+        self._register_blueprints()
+        return self.app
 
 
-def get_db_engine(app):
-    return create_engine(app.config['DATABASE_URI'], pool_size=10, max_overflow=20)
-
-
-def get_db_session(app):
-    engine = get_db_engine(app)
-    Session = sessionmaker(bind=engine)
-    return Session()
+def create_app(config_name="development"):
+    factory = AppFactory(config_name)
+    return factory.create_app()

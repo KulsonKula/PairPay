@@ -1,76 +1,79 @@
-from sqlalchemy import func
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-from .db_config import engine, Base, SessionLocal
+from flask import current_app
 from app.models import Group, User, Log, Expense, Bill
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 
 def init_db():
+    db = current_app.db
+    engine = db.get_engine()
     Base.metadata.create_all(bind=engine)
 
     try:
-        with SessionLocal() as db:
-            db.query(Log).delete()
-            db.query(Bill).delete()
-            db.query(Expense).delete()
-            db.query(Group).delete()
-            db.query(User).delete()
-            db.commit()
+        with db.get_session() as db_session:
+            db_session.query(Log).delete()
+            db_session.query(Bill).delete()
+            db_session.query(Expense).delete()
+            db_session.query(Group).delete()
+            db_session.query(User).delete()
+            db_session.commit()
 
-            user1 = create_user(db, name="Alice", surname="Smith",
-                                mail="alice@gmail.com", password="securepass", admin=True)
-            user2 = create_user(db, name="Bob", surname="Jones",
-                                mail="bob@gmail.com", password="anotherpass")
+            user1 = create_user(db_session, "Alice", "Smith",
+                                "alice@gmail.com", "securepass", True)
+            user2 = create_user(db_session, "Bob", "Jones",
+                                "bob@gmail.com", "anotherpass")
 
-            create_log(db, user_id=user1.id, data="User logged in")
-            create_log(db, user_id=user2.id, data="User created a bill")
+            create_log(db_session, user1.id, "User logged in")
+            create_log(db_session, user2.id, "User created a bill")
 
-            create_group(db, user_lider=user1.id, user_member=user2.id)
-            create_group(db, user_lider=user2.id, user_member=user1.id)
+            create_group(db_session, user1.id, user2.id)
+            create_group(db_session, user2.id, user1.id)
 
-            expense1 = create_expense(
-                db, name="Dinner", currency=1, price=50.0)
-            expense2 = create_expense(db, name="Taxi", currency=1, price=30.0)
+            expense1 = create_expense(db_session, "Dinner", 1, 50.0)
+            expense2 = create_expense(db_session, "Taxi", 1, 30.0)
 
-            create_bill(db, user_creator_id=user1.id, user_added_id=user2.id,
-                        expense_id=expense1.id, name="Dinner Bill", label="Food", status=1, total_sum=50.0)
-            create_bill(db, user_creator_id=user2.id, user_added_id=user1.id, expense_id=expense2.id,
-                        name="Taxi Bill", label="Transport", status=2, total_sum=30.0)
+            create_bill(db_session, user1.id, user2.id,
+                        expense1.id, "Dinner Bill", "Food", 1, 50.0)
+            create_bill(db_session, user2.id, user1.id, expense2.id,
+                        "Taxi Bill", "Transport", 2, 30.0)
 
     except SQLAlchemyError as e:
         print(f"Error during DB initialization: {e}")
-        db.rollback()
+        db_session.rollback()
 
 
-def create_user(db: Session, name: str, surname: str, mail: str, password: str, admin: bool = False):
+def create_user(db_session, name, surname, mail, password, admin=False):
     user = User(name=name, surname=surname, mail=mail,
                 password_hash=password, admin=admin)
-    db.add(user)
-    db.commit()
+    db_session.add(user)
+    db_session.commit()
     return user
 
 
-def create_log(db: Session, user_id: int, data: str):
+def create_log(db_session, user_id, data):
     log = Log(user_id=user_id, data=data, created_at=func.now())
-    db.add(log)
-    db.commit()
+    db_session.add(log)
+    db_session.commit()
 
 
-def create_group(db: Session, user_lider: int, user_member: int):
+def create_group(db_session, user_lider, user_member):
     group = Group(user_lider=user_lider, user_member=user_member)
-    db.add(group)
-    db.commit()
+    db_session.add(group)
+    db_session.commit()
 
 
-def create_expense(db: Session, name: str, currency: int, price: float):
+def create_expense(db_session, name, currency, price):
     expense = Expense(name=name, currency=currency, price=price)
-    db.add(expense)
-    db.commit()
+    db_session.add(expense)
+    db_session.commit()
     return expense
 
 
-def create_bill(db: Session, user_creator_id: int, user_added_id: int, expense_id: int, name: str, label: str, status: int, total_sum: float):
-    bill = Bill(user_creator_id=user_creator_id, user_added_id=user_added_id,
-                expense_id=expense_id, name=name, label=label, status=status, total_sum=total_sum)
-    db.add(bill)
-    db.commit()
+def create_bill(db_session, user_creator_id, user_added_id, expense_id, name, label, status, total_sum):
+    bill = Bill(user_creator_id=user_creator_id, user_added_id=user_added_id, expense_id=expense_id,
+                name=name, label=label, status=status, total_sum=total_sum)
+    db_session.add(bill)
+    db_session.commit()
