@@ -1,14 +1,20 @@
-from sqlalchemy import Column, Integer, String, Float
-from sqlalchemy.orm import relationship
-from app.db.db_config import Base
+from app import db
 
 
-class Expense(Base):
+class Expense(db.Model):
     __tablename__ = 'expense'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    currency = Column(Integer, nullable=False)
-    price = Column(Float, nullable=False)
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    name = db.Column(db.String, nullable=False)
+    currency = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=False)
 
-    bills = relationship("Bill", back_populates="expense")
+    bills = db.relationship("Bill", back_populates="expense")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "currency": self.currency,
+            "price": self.price
+        }

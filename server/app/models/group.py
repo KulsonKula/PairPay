@@ -1,18 +1,26 @@
-from sqlalchemy import Column, Integer, DateTime, ForeignKey, Integer
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from app.db.db_config import Base
+from app import db
 
 
-class Group(Base):
+class Group(db.Model):
     __tablename__ = 'group'
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_lider = Column(Integer, ForeignKey("user.id"), nullable=False)
-    user_member = Column(Integer, ForeignKey("user.id"))
-    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    user_lider = db.Column(
+        db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_member = db.Column(db.Integer, db.ForeignKey("user.id"))
+    created_at = db.Column(
+        db.DateTime, server_default=db.func.now(), nullable=False)
 
-    lider = relationship("User", back_populates="groups_led",
-                         foreign_keys=[user_lider])
-    member = relationship(
+    lider = db.relationship(
+        "User", back_populates="groups_led", foreign_keys=[user_lider])
+
+    member = db.relationship(
         "User", back_populates="groups_member", foreign_keys=[user_member])
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_lider": self.user_lider,
+            "user_member": self.user_member,
+            "created_at": self.created_at
+        }

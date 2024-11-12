@@ -2,11 +2,13 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from app.config import config_by_name
-from app.db.db_config import Database, Base
+from flask_sqlalchemy import SQLAlchemy
 from app.routes.bill_api import bill_bp
+from app.secret.auth import auth_bp
 from app.db.db_init import init_db
+from flask_jwt_extended import JWTManager
 
-# TODO pw przeniesc do inego pliku?
+db = SQLAlchemy()
 
 
 class AppFactory:
@@ -24,18 +26,23 @@ class AppFactory:
                                           "allow_headers": self.app.config['CORS_ALLOW_HEADERS']}})
 
     def _register_blueprints(self):
+        self.app.register_blueprint(auth_bp)
         self.app.register_blueprint(bill_bp)
 
     def _initialize_db(self):
-        self.app.db = Database(self.app.config)
-        Base.metadata.create_all(bind=self.app.db.get_engine())
+        db.init_app(self.app)
         with self.app.app_context():
+            db.create_all()
             init_db()
+
+    def _initialize_jwt(self):
+        self.jwt = JWTManager(self.app)
 
     def create_app(self):
         self._load_config()
         self._initialize_cors()
         self._initialize_db()
+        self._initialize_jwt()
         self._register_blueprints()
         return self.app
 
