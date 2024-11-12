@@ -1,14 +1,11 @@
-import os
 from flask import Flask
 from flask_cors import CORS
 from app.config import config_by_name
-from flask_sqlalchemy import SQLAlchemy
+from app.db import db
 from app.routes.bill_api import bill_bp
-from app.secret.auth import auth_bp
+from app.routes.auth import auth_bp
 from app.db.db_init import init_db
 from flask_jwt_extended import JWTManager
-
-db = SQLAlchemy()
 
 
 class AppFactory:
