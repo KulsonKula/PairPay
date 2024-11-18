@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv(".env.dev")
 
@@ -15,7 +16,7 @@ class Config:
         self.SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
         self.SQLALCHEMY_TRACK_MODIFICATIONS = False
         self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-        self.JWT_ACCESS_TOKEN_EXPIRES = 3600
+        self.JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
         self.configure_for_env()
 

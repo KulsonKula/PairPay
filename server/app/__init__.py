@@ -34,6 +34,8 @@ class AppFactory:
 
     def _initialize_jwt(self):
         self.jwt = JWTManager(self.app)
+        self.app.config["JWT_SECRET_KEY"] = self.app.config["JWT_SECRET_KEY"]
+        self.app.config["JWT_ACCESS_TOKEN_EXPIRES"] = self.app.config["JWT_ACCESS_TOKEN_EXPIRES"]
 
     def create_app(self):
         self._load_config()
