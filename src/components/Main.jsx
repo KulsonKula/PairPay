@@ -1,7 +1,9 @@
 import { get_recipe_id } from "./api.jsx";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/Main.css"
 
-export default function Main_app() {
+export default function Main() {
   const [file, setFile] = useState(null);
   const [recipeText, setRecipeText] = useState(null);
 
@@ -23,18 +25,36 @@ export default function Main_app() {
     setFile(event.target.files[0]);
   };
 
+  const navigate = useNavigate();
+  const goToLogin = () => {
+    navigate("/login");
+  };
+
+  const goToRegister = () => {
+    navigate("/register");
+  };
+
   return (
-    <div>
+    <div className="page-container" >
+
+      <nav className="navbar">
+        <button className="nav-button" onClick={goToLogin}>Zaloguj się</button>
+        <button className="nav-button" onClick={goToRegister}>Zarejestruj się</button>
+      </nav>
+
       <input
+        className="form-input"
         type="file"
         id="file"
         accept="image/*"
         onChange={handleFileChange}
       />
-      <button type="button" name="login" onClick={handleapi}>
-        Submit
-      </button>
-      {recipeText && <div>{recipeText}</div>} {/* Display the response data */}
+
+      <button className="form-button"
+      onClick={handleapi}>Zatwierdź</button>
+
+      {recipeText && <div>{recipeText}</div>} {}
+
     </div>
   );
 }
