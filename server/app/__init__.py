@@ -3,6 +3,7 @@ from flask_cors import CORS
 from app.config import config_by_name
 from app.db import db
 from app.routes.bill_api import bill_bp
+from app.routes.user_api import user_bp
 from app.routes.auth import auth_bp
 from app.db.db_init import init_db
 from flask_jwt_extended import JWTManager
@@ -24,6 +25,7 @@ class AppFactory:
 
     def _register_blueprints(self):
         self.app.register_blueprint(auth_bp)
+        self.app.register_blueprint(user_bp)
         self.app.register_blueprint(bill_bp)
 
     def _initialize_db(self):

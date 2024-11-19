@@ -3,8 +3,11 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User
 from app import db
+from logging import getLogger
 
 auth_bp = Blueprint('auth_bp', __name__)
+
+logger = getLogger(__name__)
 
 
 @auth_bp.route('/api/register', methods=['POST'])
@@ -53,6 +56,7 @@ def login():
     user = User.query.filter_by(mail=mail).first()
 
     if user and check_password_hash(user.password, password):
+        logger.info(user.id)
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
         return jsonify(access_token=access_token, refresh_token=refresh_token), 200
