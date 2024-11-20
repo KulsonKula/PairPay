@@ -5,6 +5,7 @@ from sqlalchemy_utils import EmailType
 class User(db.Model):
     __tablename__ = 'user'
 
+    # moze zmiana na uuid byla by lepsza
     id = db.Column(db.Integer, primary_key=True, index=True)
     name = db.Column(db.String, nullable=False)
     surname = db.Column(db.String, nullable=False)
