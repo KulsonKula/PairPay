@@ -7,6 +7,7 @@ from app.routes.user_api import user_bp
 from app.routes.auth import auth_bp
 from app.db.db_init import init_db
 from flask_jwt_extended import JWTManager
+from app.models import TokenBlocklist
 
 
 class AppFactory:
@@ -36,8 +37,11 @@ class AppFactory:
 
     def _initialize_jwt(self):
         self.jwt = JWTManager(self.app)
-        self.app.config["JWT_SECRET_KEY"] = self.app.config["JWT_SECRET_KEY"]
-        self.app.config["JWT_ACCESS_TOKEN_EXPIRES"] = self.app.config["JWT_ACCESS_TOKEN_EXPIRES"]
+
+        @self.jwt.token_in_blocklist_loader
+        def check_if_token_in_blocklist(jwt_header, jwt_payload):
+            jti = jwt_payload["jti"]
+            return TokenBlocklist.query.filter_by(jti=jti).first() is not None
 
     def create_app(self):
         self._load_config()
