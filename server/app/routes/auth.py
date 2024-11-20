@@ -5,6 +5,9 @@ from app.models import User
 from app import db
 from logging import getLogger
 from http import HTTPStatus
+from flask_jwt_extended import get_jwt
+from app.models import *
+from datetime import datetime, timezone
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -69,4 +72,15 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), HTTPStatus.OK
+    access_token = create_access_token(identity=current_user)
+    return jsonify(access_token=access_token)
+
+
+@auth_bp.route('/api/logout', methods=['DELETE'])
+@jwt_required()
+def blacklist_token():
+    jti = get_jwt()["jti"]
+    now = datetime.now(timezone.utc)
+    db.session.add(TokenBlocklist(jti=jti, created_at=now))
+    db.session.commit()
+    return jsonify(msg="JWT revoked")
