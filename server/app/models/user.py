@@ -5,6 +5,7 @@ from sqlalchemy_utils import EmailType
 class User(db.Model):
     __tablename__ = 'user'
 
+    # moze zmiana na uuid byla by lepsza
     id = db.Column(db.Integer, primary_key=True, index=True)
     name = db.Column(db.String, nullable=False)
     surname = db.Column(db.String, nullable=False)
@@ -16,16 +17,16 @@ class User(db.Model):
     bills_created = db.relationship(
         "Bill", foreign_keys="[Bill.user_creator_id]", back_populates="user_creator"
     )
-    bills_added = db.relationship(
-        "Bill", foreign_keys="[Bill.user_added_id]", back_populates="user_added"
-    )
+
+    bills = db.relationship("Bill", secondary="bill_user",
+                            back_populates="users")
 
     groups_led = db.relationship(
         "Group", back_populates="lider", foreign_keys="[Group.user_lider]"
     )
 
-    groups_member = db.relationship(
-        "Group", back_populates="member", foreign_keys="[Group.user_member]"
+    member_of_groups = db.relationship(
+        "Group", secondary="user_group", back_populates="members"
     )
 
     log = db.relationship("Log", back_populates="user")

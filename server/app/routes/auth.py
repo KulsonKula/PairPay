@@ -3,8 +3,12 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User
 from app import db
+from logging import getLogger
+from http import HTTPStatus
 
 auth_bp = Blueprint('auth_bp', __name__)
+
+logger = getLogger(__name__)
 
 
 @auth_bp.route('/api/register', methods=['POST'])
@@ -17,12 +21,12 @@ def register():
     password = data.get('password')
 
     if not all([name, surname, mail, password]):
-        return jsonify({"msg": "All fields (name, surname, mail, password) are required"}), 400
+        return jsonify({"msg": "All fields (name, surname, mail, password) are required"}), HTTPStatus.BAD_REQUEST
 
     try:
         user_exists = User.query.filter_by(mail=mail).first()
         if user_exists:
-            return jsonify({"msg": "A user with this email address already exists"}), 400
+            return jsonify({"msg": "A user with this email address already exists"}), HTTPStatus.BAD_REQUEST
 
         hashed_password = generate_password_hash(password)
 
@@ -36,11 +40,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({"msg": "User successfully registered"}), 201
+        return jsonify({"msg": "User successfully registered"}), HTTPStatus.CREATED
 
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify(message="An error occurred during user registration.", error=str(e)), 500
+        return jsonify(message="An error occurred during user registration.", error=str(e)), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 @auth_bp.route("/api/login", methods=["POST"])
@@ -53,15 +57,16 @@ def login():
     user = User.query.filter_by(mail=mail).first()
 
     if user and check_password_hash(user.password, password):
+        logger.info(user.id)
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
-        return jsonify(access_token=access_token, refresh_token=refresh_token), 200
+        return jsonify(access_token=access_token, refresh_token=refresh_token), HTTPStatus.OK
 
-    return jsonify({"message": "Invalid E-mail or prassword"}), 401
+    return jsonify({"message": "Invalid E-mail or prassword"}), HTTPStatus.UNAUTHORIZED
 
 
 @auth_bp.route('/api/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
     current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+    return jsonify(logged_in_as=current_user), HTTPStatus.OK

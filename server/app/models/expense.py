@@ -9,7 +9,8 @@ class Expense(db.Model):
     currency = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
 
-    bills = db.relationship("Bill", back_populates="expense")
+    bills = db.relationship("Bill", secondary="bill_expense",
+                            back_populates="expenses")
 
     def to_dict(self):
         return {
