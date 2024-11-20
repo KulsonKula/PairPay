@@ -17,6 +17,7 @@ class Config:
         self.SQLALCHEMY_TRACK_MODIFICATIONS = False
         self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
         self.JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+        self.JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
         self.configure_for_env()
 
