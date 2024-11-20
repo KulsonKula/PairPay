@@ -1,6 +1,6 @@
 from logging import getLogger
 from app import db
-from app.models import Group, User, Log, Expense, Bill, user_group, bill_user, bill_expense
+from app.models import Group, User, Log, Expense, Bill, user_group, bill_user, bill_expense, Invitation
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,7 +15,9 @@ def init_db():
         db.session.execute(user_group.delete())
         db.session.execute(bill_user.delete())
         db.session.execute(bill_expense.delete())
+
         db.session.query(Log).delete()
+        db.session.query(Invitation).delete()
         db.session.query(Bill).delete()
         db.session.query(Expense).delete()
         db.session.query(Group).delete()

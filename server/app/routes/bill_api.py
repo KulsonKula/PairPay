@@ -1,8 +1,8 @@
 from logging import getLogger
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import Bill, User
-from app.services.bill_service import get_bills_for_user, update_bill_fields, update_bill_users, get_bill_for_user, delete_bill
+from app.models import Bill, User, Invitation, InvitationStatus
+from app.services.bill_service import get_bills_for_user, update_bill_fields, get_bill_for_user, delete_bill, invite_user_to_bill
 from app.utils.helpers import serialize_bill
 from app import db
 from http import HTTPStatus
@@ -62,7 +62,6 @@ def get_specific_bill(bill_id):
         return jsonify({
             "message": "Failed to retrieve bill due to a database error"
         }), HTTPStatus.INTERNAL_SERVER_ERROR
-
     except Exception as e:
         logger.error(f"Unexpected error retrieving bill {
                      bill_id} for user {current_user}: {str(e)}")
@@ -79,6 +78,9 @@ def create_bill():
     try:
         bill_data = request.get_json()
 
+        if not bill_data:
+            return jsonify({"message": "No input data provided"}), HTTPStatus.BAD_REQUEST
+
         bill = Bill(
             user_creator_id=current_user,
             name=bill_data.get("name"),
@@ -86,11 +88,6 @@ def create_bill():
             status=bill_data.get("status"),
             total_sum=bill_data.get("total_sum")
         )
-
-        if "users" in bill_data:
-            users = User.query.filter(User.id.in_(bill_data["users"])).all()
-            if users:
-                bill.users.extend(users)
 
         db.session.add(bill)
         db.session.commit()
@@ -133,7 +130,6 @@ def modify_specific_bill(bill_id):
             return jsonify({"message": "Bill not found or you are not authorized to modify it"}), HTTPStatus.NOT_FOUND
 
         update_bill_fields(bill, bill_data)
-        update_bill_users(bill, bill_data.get('users', []))
 
         db.session.commit()
 
@@ -166,8 +162,57 @@ def delete_specific_bill(bill_id):
         logger.error(f"Database error occurred while deleting bill {
                      bill_id}: {str(e)}")
         return jsonify({"message": "Database error occurred while deleting the bill"}), HTTPStatus.INTERNAL_SERVER_ERROR
-
     except Exception as e:
         logger.error(f"Unexpected error occurred while deleting bill {
                      bill_id}: {str(e)}")
         return jsonify({"message": "An unexpected error occurred"}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@bill_bp.route('/api/bills/<int:bill_id>/invite', methods=['POST'])
+@jwt_required()
+def invite_to_bill(bill_id):
+    current_user = get_jwt_identity()
+    invite_data = request.get_json()
+
+    try:
+        invitee_id = invite_data.get("invitee_id")
+
+        if not invitee_id:
+            return jsonify({"message": "Invitee ID is required"}), HTTPStatus.BAD_REQUEST
+
+        invitation = invite_user_to_bill(bill_id, current_user, invitee_id)
+        return jsonify({"message": "Invitation sent successfully", "invitation_id": invitation.id}), HTTPStatus.CREATED
+
+    except PermissionError as e:
+        return jsonify({"message": str(e)}), HTTPStatus.FORBIDDEN
+    except ValueError as e:
+        return jsonify({"message": str(e)}), HTTPStatus.BAD_REQUEST
+    except SQLAlchemyError as e:
+        logger.error(f"Database error while sending invitation: {str(e)}")
+        return jsonify({"message": "Database error occurred while processing the invitation"}), HTTPStatus.INTERNAL_SERVER_ERROR
+    except Exception as e:
+        logger.error(f"Error while sending invitation: {str(e)}")
+        return jsonify({"message": "An unexpected error occurred"}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@bill_bp.route('/api/invitations/<int:invitation_id>/accept', methods=['POST'])
+@jwt_required()
+def accept_invitation(invitation_id):
+    current_user = get_jwt_identity()
+
+    try:
+        invitation = Invitation.query.filter_by(
+            id=invitation_id, invitee_id=current_user, status=InvitationStatus.PENDING).first()
+        if not invitation:
+            return jsonify({"message": "Invitation not found or already handled"}), HTTPStatus.NOT_FOUND
+
+        bill = Bill.query.get(invitation.bill_id)
+        bill.users.append(User.query.get(current_user))
+
+        invitation.status = InvitationStatus.ACCEPTED
+        db.session.commit()
+
+        return jsonify({"message": "Invitation accepted successfully"}), HTTPStatus.OK
+    except Exception as e:
+        logger.error(f"Error accepting invitation: {str(e)}")
+        return jsonify({"message": "Failed to accept invitation"}), HTTPStatus.INTERNAL_SERVER_ERROR

@@ -18,7 +18,7 @@ class Invitation(db.Model):
         db.Integer, db.ForeignKey("user.id"), nullable=False)
     invitee_id = db.Column(
         db.Integer, db.ForeignKey("user.id"), nullable=False)
-    bill_id = db.Column(db.Integer, db.ForeginKey("bill.id"), nullable=False)
+    bill_id = db.Column(db.Integer, db.ForeignKey("bill.id"), nullable=False)
     status = db.Column(Enum(InvitationStatus),
                        default=InvitationStatus.PENDING, nullable=False)
     created_at = db.Column(db.DateTime, server_default=func.now())
