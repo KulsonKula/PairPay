@@ -3,16 +3,21 @@ from app.models import Bill, bill_user, Invitation
 from app import db
 
 
-def get_bills_for_user(user_id):
+def get_bills_for_user_creator(user_id):
     return (
         Bill.query
         .outerjoin(bill_user)
-        .filter(
-            or_(
-                bill_user.c.user_id == user_id,
-                Bill.user_creator_id == user_id
-            )
-        )
+        .filter(Bill.user_creator_id == user_id)
+        .distinct()
+        .all()
+    )
+
+
+def get_bills_for_user_assigned(user_id):
+    return (
+        Bill.query
+        .outerjoin(bill_user)
+        .filter(bill_user.c.user_id == user_id)
         .distinct()
         .all()
     )
