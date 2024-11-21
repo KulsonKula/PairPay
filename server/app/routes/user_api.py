@@ -1,13 +1,15 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify, Blueprint, request
 from app.models import User
+from app.services import update_user_fields
 from http import HTTPStatus
 from app import db
-from werkzeug.security import generate_password_hash
+from http import HTTPStatus
 
 user_bp = Blueprint('user_bp', __name__)
 
 # CREATE USER IN auth.py
+# PASSWORD RESET IN auth.py
 
 
 @user_bp.route('/api/current_user', methods=['GET'])
@@ -31,94 +33,85 @@ def get_current_user():
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-@user_bp.route('/api/del_user', methods=['DELETE'])
+@user_bp.route('/api/user/del_user', methods=['DELETE'])
 @jwt_required()
 def del_user():
     try:
-        current_user_id = get_jwt_identity()
-        data = request.get_json()
-        del_user_id = data.get("del_user_id")
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
 
-        if not del_user_id:
-            return jsonify({"error": "del_user_id is required."}), 400
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully."}), HTTPStatus.OK
 
-        user = User.query.get(current_user_id)
-        del_user = User.query.get(del_user_id)
-
-        if not del_user:
-            return jsonify({"error": "User not found."}), 404
-
-        if del_user == user or user.admin:
-            db.session.delete(del_user)
-            db.session.commit()
-            return jsonify({"message": "User deleted successfully."}), 200
-        else:
-            return jsonify({"error": "Unauthorized action."}), 403
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-@user_bp.route('/api/update_user', methods=['POST'])
+@user_bp.route('/api/user/update', methods=['POST'])
 @jwt_required()
 def update_user():
     try:
-        current_user_id = get_jwt_identity()
+        user = get_jwt_identity()
         data = request.get_json()
-        name = data.get("name")
-        mail = data.get("mail")
-        surname = data.get("surname")
-        password = data.get("password")
-        updated_user_id = data.get("updated_user_id")
 
-        if not updated_user_id:
-            return jsonify({"error": "updated_user_id is required."}), 400
+        update_user_fields(user, data)
+        db.session.commit()
+        return jsonify({"message": "User updated successfully."}), HTTPStatus.OK
 
-        user = User.query.get(current_user_id)
-        updated_user = User.query.get(updated_user_id)
-
-        if not updated_user:
-            return jsonify({"error": "User not found."}), 404
-
-        if updated_user == user or user.admin:
-            if name:
-                updated_user.name = name
-            if mail:
-                updated_user.mail = mail
-            if surname:
-                updated_user.surname = surname
-            if password:
-                updated_user.password = generate_password_hash(password)
-
-                db.session.commit()
-            return jsonify({"message": "User updated successfully."}), 200
-        else:
-            return jsonify({"error": "Unauthorized action."}), 403
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-@user_bp.route('/api/make_admin_user', methods=['POST'])
+@user_bp.route('/api/user/admin/make_admin', methods=['POST'])
 @jwt_required()
-def make_admin_user():
+def make_admin():
     try:
         current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+
+        if not current_user.admin:
+            return jsonify({"error": "Unauthorized action."}), HTTPStatus.UNAUTHORIZED
+
         data = request.get_json()
-        make_admin_user_id = data.get("make_admin_user_id")
+        target_user = if_user_exist(data.get("target_user_id"))
 
-        if not make_admin_user_id:
-            return jsonify({"error": "make_admin_user_id is required."}), 400
+        target_user.admin = True
+        db.session.commit()
+        return jsonify({"message": "User granted admin privileges successfully."}), HTTPStatus.OK
 
-        user = User.query.get(current_user_id)
-        make_admin_user = User.query.get(make_admin_user_id)
-
-        if not make_admin_user:
-            return jsonify({"error": "User not found."}), 404
-
-        if user.admin:
-            make_admin_user.admin = True
-            db.session.commit()
-            return jsonify({"message": "User have granted admin successfully."}), 200
-        else:
-            return jsonify({"error": "Unauthorized action."}), 403
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@user_bp.route('/api/user/admin/update', methods=['POST'])
+@jwt_required()
+def update_user_by_admin():
+    try:
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+
+        if not current_user.admin:
+            return jsonify({"error": "Unauthorized action."}), HTTPStatus.UNAUTHORIZED
+
+        data = request.get_json()
+        target_user = if_user_exist(data.get("target_user_id"))
+
+        update_user_fields(target_user, data)
+        db.session.commit()
+        return jsonify({"message": "User granted admin privileges successfully."}), HTTPStatus.OK
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+def if_user_exist(user_id):
+
+    if not user_id:
+        return jsonify({"error": "user_id is required."}), HTTPStatus.BAD_REQUEST
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found."}), HTTPStatus.NOT_FOUND
+
+    return user

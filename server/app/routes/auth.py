@@ -84,3 +84,7 @@ def blacklist_token():
     db.session.add(TokenBlocklist(jti=jti, created_at=now))
     db.session.commit()
     return jsonify(msg="JWT revoked")
+
+# @user_bp.route('/api/user/password_reset', methods=['POST'])
+# @jwt_required()
+# def reset_password():
