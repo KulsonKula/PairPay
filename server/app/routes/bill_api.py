@@ -2,7 +2,7 @@ from logging import getLogger
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import Bill, User, Invitation, InvitationStatus
-from app.services.bill_service import get_bills_for_user, update_bill_fields, get_bill_for_user, delete_bill, invite_user_to_bill
+from app.services.bill_service import get_bills_for_user_creator, get_bills_for_user_assigned, update_bill_fields, get_bill_for_user, delete_bill, invite_user_to_bill
 from app.utils.helpers import serialize_bill
 from app import db
 from http import HTTPStatus
@@ -13,13 +13,39 @@ bill_bp = Blueprint('bill_bp', __name__)
 logger = getLogger(__name__)
 
 
-@bill_bp.route('/api/bills', methods=['GET'])
+@bill_bp.route('/api/bills/created', methods=['GET'])
 @jwt_required()
-def get_all_bills():
+def get_all_bills_created():
     current_user = get_jwt_identity()
 
     try:
-        bills = get_bills_for_user(current_user)
+        bills = get_bills_for_user_creator(current_user)
+
+        bills_data = [bill.to_dict() for bill in bills]
+        logger.info(f"Bills data: {bills_data}")
+
+        return jsonify({
+            "bills": bills_data
+        }), HTTPStatus.OK
+    except SQLAlchemyError as e:
+        logger.error(f"Database error fetching bills for user {
+                     current_user}: {str(e)}")
+        return jsonify({"message": "Failed to fetch bills due to a database error"}), HTTPStatus.INTERNAL_SERVER_ERROR
+    except Exception as e:
+        logger.error(f"Error fetching bills for user {current_user}: {str(e)}")
+        return jsonify({
+            "message": "Failed to fetch user's bills",
+            "message": str(e)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@bill_bp.route('/api/bills/assigned', methods=['GET'])
+@jwt_required()
+def get_all_bills_assigned():
+    current_user = get_jwt_identity()
+
+    try:
+        bills = get_bills_for_user_assigned(current_user)
 
         bills_data = [bill.to_dict() for bill in bills]
         logger.info(f"Bills data: {bills_data}")
