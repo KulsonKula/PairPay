@@ -23,6 +23,7 @@ def get_all_bills_created():
 
         bills_data = [bill.to_dict() for bill in bills]
         logger.info(f"Bills data: {bills_data}")
+        logger.info(f"Test data: {bills_data}"   )
 
         return jsonify({
             "bills": bills_data
