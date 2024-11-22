@@ -16,8 +16,7 @@ class BillSerivce:
 
     def get_created_bills(self):
         try:
-            bills = Bill.query.filter_by(
-                user_creator_id=self.current_user).all()
+            bills = Bill.query.filter_by(user_creator_id=self.current_user).all()
             bills_data = [bill.to_dict() for bill in bills]
             logger.info(f"Bills data: {bills_data}")
             return {"bills": bills_data}, HTTPStatus.OK
@@ -177,11 +176,11 @@ class BillSerivce:
                 )
 
             bill = Bill.query.filter_by(
-                id=bill_id, user_creator_id=self.current_user).first()
+                id=bill_id, user_creator_id=self.current_user
+            ).first()
 
             if not bill:
                 return (
-
                     {"message": "Only creator of the bill can invite users"},
                     HTTPStatus.FORBIDDEN,
                 )
@@ -217,11 +216,15 @@ class BillSerivce:
     def accept_invitation(self, invitation_id):
         try:
             invitation = Invitation.query.filter_by(
-                id=invitation_id, invitee_id=self.current_user, status=InvitationStatus.PENDING).first()
+                id=invitation_id,
+                invitee_id=self.current_user,
+                status=InvitationStatus.PENDING,
+            ).first()
 
             if not invitation:
                 return (
-                    {"message": "Invitation not found or already handled"}, HTTPStatus.NOT_FOUND
+                    {"message": "Invitation not found or already handled"},
+                    HTTPStatus.NOT_FOUND,
                 )
 
             bill = Bill.query.get(invitation.bill_id)
@@ -244,11 +247,15 @@ class BillSerivce:
     def decline_invitation(self, invitation_id):
         try:
             invitation = Invitation.query.filter_by(
-                id=invitation_id, invitee_id=self.current_user, status=InvitationStatus.PENDING).first()
+                id=invitation_id,
+                invitee_id=self.current_user,
+                status=InvitationStatus.PENDING,
+            ).first()
 
             if not invitation:
                 return (
-                    {"message": "Invitation not found or already handled"}, HTTPStatus.NOT_FOUND
+                    {"message": "Invitation not found or already handled"},
+                    HTTPStatus.NOT_FOUND,
                 )
 
             bill = Bill.query.get(invitation.bill_id)

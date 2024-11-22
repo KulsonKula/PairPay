@@ -12,28 +12,38 @@ class FriendshipService:
     def send_request(self, friend_id):
         try:
             if self.current_user == friend_id:
-                return {"message": "Error sending request to yourself"}, HTTPStatus.BAD_REQUEST
+                return {
+                    "message": "Error sending request to yourself"
+                }, HTTPStatus.BAD_REQUEST
 
             friendship = Friendship.query.filter(
-                ((Friendship.user_id == self.current_user)
-                 & (Friendship.friend_id == friend_id))
-                | ((Friendship.user_id == friend_id) & (Friendship.friend_id == self.current_user))
+                (
+                    (Friendship.user_id == self.current_user)
+                    & (Friendship.friend_id == friend_id)
+                )
+                | (
+                    (Friendship.user_id == friend_id)
+                    & (Friendship.friend_id == self.current_user)
+                )
             ).first()
 
             if friendship:
                 return {"message": "Request already exists"}, HTTPStatus.BAD_REQUEST
 
-            new_friendship = Friendship(
-                user_id=self.current_user, friend_id=friend_id)
+            new_friendship = Friendship(user_id=self.current_user, friend_id=friend_id)
             db.session.add(new_friendship)
             db.session.commit()
             return {"message": "Friend request sent successfully"}, HTTPStatus.CREATED
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            return {"message": f"Database error: {str(e)}"}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
-            return {"message": f"An unexpected error occurred: {str(e)}"}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def accept_request(self, request_id):
         try:
@@ -48,9 +58,13 @@ class FriendshipService:
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            return {"message": f"Database error: {str(e)}"}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
-            return {"message": f"An unexpected error occurred: {str(e)}"}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def decline_request(self, request_id):
         try:
@@ -65,9 +79,13 @@ class FriendshipService:
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            return {"message": f"Database error: {str(e)}"}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
-            return {"message": f"An unexpected error occurred: {str(e)}"}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def get_friends(self):
         try:
@@ -79,8 +97,16 @@ class FriendshipService:
 
             friends = [
                 {
-                    "id": friendship.friend.id if friendship.user_id == self.current_user else friendship.user.id,
-                    "mail": friendship.friend.mail if friendship.user_id == self.current_user else friendship.user.mail,
+                    "id": (
+                        friendship.friend.id
+                        if friendship.user_id == self.current_user
+                        else friendship.user.id
+                    ),
+                    "mail": (
+                        friendship.friend.mail
+                        if friendship.user_id == self.current_user
+                        else friendship.user.mail
+                    ),
                 }
                 for friendship in friends_query
             ]
@@ -88,9 +114,15 @@ class FriendshipService:
             return {"friends": friends}, HTTPStatus.OK
 
         except SQLAlchemyError as e:
-            return {"message": "Database error", "details": str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": "Database error",
+                "details": str(e),
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
-            return {"message": "Unexpected error occurred", "details": str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": "Unexpected error occurred",
+                "details": str(e),
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def get_pending_requests(self):
         try:
@@ -99,14 +131,23 @@ class FriendshipService:
             ).all()
 
             request_list = [
-                {"id": request.id, "user_id": request.user_id,
-                    "mail": request.user.mail}
+                {
+                    "id": request.id,
+                    "user_id": request.user_id,
+                    "mail": request.user.mail,
+                }
                 for request in pending_requests
             ]
 
             return {"pending_requests": request_list}, HTTPStatus.OK
 
         except SQLAlchemyError as e:
-            return {"message": "Database error", "details": str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": "Database error",
+                "details": str(e),
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
-            return {"message": "Unexpected error occurred", "details": str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                "message": "Unexpected error occurred",
+                "details": str(e),
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
