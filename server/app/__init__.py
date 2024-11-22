@@ -16,13 +16,21 @@ class AppFactory:
         self.app = Flask(__name__)
 
     def _load_config(self):
-        self.app.config.from_object(config_by_name.get(
-            self.config_name, config_by_name["development"]))
+        self.app.config.from_object(
+            config_by_name.get(self.config_name, config_by_name["development"])
+        )
 
     def _initialize_cors(self):
-        CORS(self.app, resources={r"/*": {"origins": self.app.config['CORS_ORIGINS'],
-                                          "methods": self.app.config['CORS_METHODS'],
-                                          "allow_headers": self.app.config['CORS_ALLOW_HEADERS']}})
+        CORS(
+            self.app,
+            resources={
+                r"/*": {
+                    "origins": self.app.config["CORS_ORIGINS"],
+                    "methods": self.app.config["CORS_METHODS"],
+                    "allow_headers": self.app.config["CORS_ALLOW_HEADERS"],
+                }
+            },
+        )
 
     def _register_blueprints(self):
         self.app.register_blueprint(auth_bp)

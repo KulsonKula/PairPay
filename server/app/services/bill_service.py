@@ -5,8 +5,7 @@ from app import db
 
 def get_bills_for_user_creator(user_id):
     return (
-        Bill.query
-        .outerjoin(bill_user)
+        Bill.query.outerjoin(bill_user)
         .filter(Bill.user_creator_id == user_id)
         .distinct()
         .all()
@@ -15,8 +14,7 @@ def get_bills_for_user_creator(user_id):
 
 def get_bills_for_user_assigned(user_id):
     return (
-        Bill.query
-        .outerjoin(bill_user)
+        Bill.query.outerjoin(bill_user)
         .filter(bill_user.c.user_id == user_id)
         .distinct()
         .all()
@@ -26,15 +24,14 @@ def get_bills_for_user_assigned(user_id):
 def get_bill_for_user(bill_id, current_user):
     bill = Bill.query.filter(
         Bill.id == bill_id,
-        (Bill.user_creator_id == current_user) | (
-            Bill.users.any(id=current_user))
+        (Bill.user_creator_id == current_user) | (Bill.users.any(id=current_user)),
     ).first()
 
     return bill
 
 
 def update_bill_fields(bill, bill_data):
-    updatable_fields = ['name', 'label', 'status', 'total_sum']
+    updatable_fields = ["name", "label", "status", "total_sum"]
     for field in updatable_fields:
         if field in bill_data:
             setattr(bill, field, bill_data[field])
@@ -65,8 +62,7 @@ def update_bill_fields(bill, bill_data):
 
 
 def delete_bill(bill_id, current_user):
-    bill = Bill.query.filter_by(
-        id=bill_id, user_creator_id=current_user).first()
+    bill = Bill.query.filter_by(id=bill_id, user_creator_id=current_user).first()
 
     if not bill:
         return None, "Bill not found or user does not have access"
@@ -78,8 +74,7 @@ def delete_bill(bill_id, current_user):
 
 
 def invite_user_to_bill(bill_id, current_user, invitee_id):
-    bill = Bill.query.filter_by(
-        id=bill_id, user_creator_id=current_user).first()
+    bill = Bill.query.filter_by(id=bill_id, user_creator_id=current_user).first()
 
     if not bill:
         raise PermissionError("Only creator of the bill can invite users")
@@ -88,9 +83,7 @@ def invite_user_to_bill(bill_id, current_user, invitee_id):
         raise ValueError("User is already part of the bill")
 
     invitation = Invitation(
-        inviter_id=current_user,
-        invitee_id=invitee_id,
-        bill_id=bill_id
+        inviter_id=current_user, invitee_id=invitee_id, bill_id=bill_id
     )
 
     db.session.add(invitation)
