@@ -1,6 +1,6 @@
 from logging import getLogger
 from app import db
-from app.models import Group, User, Log, Expense, Bill, user_group, bill_user, bill_expense, Invitation
+from app.models import Group, User, Split, Log, Expense, Bill, user_group, bill_user, bill_expense, Invitation
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,6 +19,7 @@ def init_db():
         db.session.query(Log).delete()
         db.session.query(Invitation).delete()
         db.session.query(Bill).delete()
+        db.session.query(Split).delete()
         db.session.query(Expense).delete()
         db.session.query(Group).delete()
         db.session.query(User).delete()
@@ -50,6 +51,9 @@ def init_db():
                     expense1.id], "Dinner Bill", "Food", 1, 50.0)
         create_bill(user2.id, [user1.id], [expense2.id],
                     "Taxi Bill", "Transport", 2, 30.0)
+
+        create_split(expense1.id, user1.id, 30)
+        create_split(expense1.id, user2.id, 40)
 
         logger.info("Database initialization successful.")
 
@@ -99,6 +103,15 @@ def create_expense(name, currency, price):
     return expense
 
 
+def create_split(expense_id, user_id, split_amount):
+    split = Split(expense_id=expense_id, user_id=user_id,
+                  split_amount=split_amount)
+    db.session.add(split)
+    db.session.commit()
+    logger.info(f"Split created: {expense_id}, Price: {split_amount}")
+    return split
+
+
 def create_bill(user_creator_id, user_added_ids, expense_ids, name, label, status, total_sum):
     bill = Bill(
         user_creator_id=user_creator_id,
@@ -121,5 +134,5 @@ def create_bill(user_creator_id, user_added_ids, expense_ids, name, label, statu
             bill.expenses.append(expense)
 
     db.session.commit()
-    logger.info(f"Bill created: {name}, Total Sum: {total_sum}, Users: {
-                user_added_ids}, Expenses: {expense_ids}")
+    logger.info(
+        f"Bill created: {name}, Total Sum: {total_sum}, Users: {user_added_ids}, Expenses: {expense_ids}")

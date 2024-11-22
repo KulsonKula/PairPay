@@ -1,7 +1,7 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import jsonify, Blueprint, request
 from app.models import User
-from app.services import update_user_fields
+from app.services.user_service import update_user_fields
 from http import HTTPStatus
 from app import db
 from http import HTTPStatus

@@ -28,8 +28,8 @@ def get_all_bills_created():
             "bills": bills_data
         }), HTTPStatus.OK
     except SQLAlchemyError as e:
-        logger.error(f"Database error fetching bills for user {
-                     current_user}: {str(e)}")
+        logger.error(f"Database error fetching bills for user {current_user}: "
+                     f"{str(e)}")
         return jsonify({"message": "Failed to fetch bills due to a database error"}), HTTPStatus.INTERNAL_SERVER_ERROR
     except Exception as e:
         logger.error(f"Error fetching bills for user {current_user}: {str(e)}")
@@ -54,8 +54,8 @@ def get_all_bills_assigned():
             "bills": bills_data
         }), HTTPStatus.OK
     except SQLAlchemyError as e:
-        logger.error(f"Database error fetching bills for user {
-                     current_user}: {str(e)}")
+        logger.error(
+            f"Database error fetching bills for user {current_user}: {str(e)}")
         return jsonify({"message": "Failed to fetch bills due to a database error"}), HTTPStatus.INTERNAL_SERVER_ERROR
     except Exception as e:
         logger.error(f"Error fetching bills for user {current_user}: {str(e)}")
@@ -83,14 +83,14 @@ def get_specific_bill(bill_id):
         }), HTTPStatus.OK
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error retrieving bill {
-                     bill_id} for user {current_user}: {str(e)}")
+        logger.error(
+            f"Database error retrieving bill {bill_id} for user {current_user}: {str(e)}")
         return jsonify({
             "message": "Failed to retrieve bill due to a database error"
         }), HTTPStatus.INTERNAL_SERVER_ERROR
     except Exception as e:
-        logger.error(f"Unexpected error retrieving bill {
-                     bill_id} for user {current_user}: {str(e)}")
+        logger.error(
+            f"Unexpected error retrieving bill {bill_id} for user {current_user}: {str(e)}")
         return jsonify({
             "message": "An unexpected error occurred"
         }), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -118,20 +118,18 @@ def create_bill():
         db.session.add(bill)
         db.session.commit()
 
-        logger.info(f"Bill created with ID {
-                    bill.id} by user {current_user}")
+        logger.info(f"Bill created with ID {bill.id} by user {current_user}")
 
         return jsonify({
             "message": "Bill created successfully",
             "bill": serialize_bill(bill)
         }), HTTPStatus.CREATED
     except SQLAlchemyError as e:
-        logger.error(f"Database error creating bill for user {
-                     current_user}: {str(e)}")
+        logger.error(
+            f"Database error creating bill for user {current_user}: {str(e)}")
         return jsonify({"message": "Failed to create bill due to a database error"}), HTTPStatus.INTERNAL_SERVER_ERROR
     except Exception as e:
-        logger.error(f"Error creating bill for user {
-            current_user}: {str(e)}")
+        logger.error(f"Error creating bill for user {current_user}: {str(e)}")
         return jsonify({
             "message": "Failed to create bill",
             "error": str(e)
@@ -151,8 +149,8 @@ def modify_specific_bill(bill_id):
         bill = Bill.query.filter_by(
             id=bill_id, user_creator_id=current_user).first()
         if not bill:
-            logger.warning(f"Bill with ID {bill_id} not found or user {
-                           current_user} is not the creator")
+            logger.warning(
+                f"Bill with ID {bill_id} not found or user { current_user} is not the creator")
             return jsonify({"message": "Bill not found or you are not authorized to modify it"}), HTTPStatus.NOT_FOUND
 
         update_bill_fields(bill, bill_data)
@@ -167,12 +165,12 @@ def modify_specific_bill(bill_id):
         }), HTTPStatus.OK
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error modifying bill {
-                     bill_id} for user {current_user}: {str(e)}")
+        logger.error(
+            f"Database error modifying bill {bill_id} for user {current_user}: {str(e)}")
         return jsonify({"message": "Failed to modify the bill due to a database error"}), HTTPStatus.INTERNAL_SERVER_ERROR
     except Exception as e:
-        logger.error(f"Unexpected error modifying bill {
-                     bill_id} for user {current_user}: {str(e)}")
+        logger.error(
+            f"Unexpected error modifying bill {bill_id} for user {current_user}: {str(e)}")
         return jsonify({"message": "An unexpected error occurred"}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
@@ -185,12 +183,12 @@ def delete_specific_bill(bill_id):
 
         return jsonify({"message": f"Bill {bill.id} deleted successfully"}), HTTPStatus.OK
     except SQLAlchemyError as e:
-        logger.error(f"Database error occurred while deleting bill {
-                     bill_id}: {str(e)}")
+        logger.error(
+            f"Database error occurred while deleting bill {bill_id}: {str(e)}")
         return jsonify({"message": "Database error occurred while deleting the bill"}), HTTPStatus.INTERNAL_SERVER_ERROR
     except Exception as e:
-        logger.error(f"Unexpected error occurred while deleting bill {
-                     bill_id}: {str(e)}")
+        logger.error(
+            f"Unexpected error occurred while deleting bill {bill_id}: {str(e)}")
         return jsonify({"message": "An unexpected error occurred"}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
