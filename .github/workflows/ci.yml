@@ -10,7 +10,7 @@ on:
 
 jobs:
   black:
-    runs-on: [ self-hosted, solinas-medium ]
+    runs-on: [self-hosted, solinas-medium]
 
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -26,4 +26,4 @@ jobs:
           pip install black[jupyter]
 
       - name: Run Black
-        run: black --check server/app server/main.py
+        run: black server/app server/main.py

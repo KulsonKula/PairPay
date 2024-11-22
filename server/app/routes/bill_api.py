@@ -127,7 +127,8 @@ def invite_to_bill(bill_id):
 
         invitee_id = invite_data.get("invitee_id")
         bill_service = BillSerivce(current_user)
-        response, status_code = bill_service.invite_to_bill(bill_id, invitee_id)
+        response, status_code = bill_service.invite_to_bill(
+            bill_id, invitee_id)
         return jsonify(response), status_code
     except Exception as e:
         return (

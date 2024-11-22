@@ -16,7 +16,8 @@ class BillSerivce:
 
     def get_created_bills(self):
         try:
-            bills = Bill.query.filter_by(user_creator_id=self.current_user).all()
+            bills = Bill.query.filter_by(
+                user_creator_id=self.current_user).all()
             bills_data = [bill.to_dict() for bill in bills]
             logger.info(f"Bills data: {bills_data}")
             return {"bills": bills_data}, HTTPStatus.OK

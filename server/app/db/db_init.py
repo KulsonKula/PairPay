@@ -47,7 +47,8 @@ def init_db():
             True,
         )
         user2 = create_user(
-            "Bob", "Jones", "bob@gmail.com", generate_password_hash("anotherpass")
+            "Bob", "Jones", "bob@gmail.com", generate_password_hash(
+                "anotherpass")
         )
         user3 = create_user(
             "Charlie",
@@ -56,13 +57,16 @@ def init_db():
             generate_password_hash("password123"),
         )
         user4 = create_user(
-            "David", "Miller", "david@gmail.com", generate_password_hash("pass456")
+            "David", "Miller", "david@gmail.com", generate_password_hash(
+                "pass456")
         )
         user5 = create_user(
-            "Emma", "Wilson", "emma@gmail.com", generate_password_hash("pass789")
+            "Emma", "Wilson", "emma@gmail.com", generate_password_hash(
+                "pass789")
         )
         user6 = create_user(
-            "Fiona", "Taylor", "fiona@gmail.com", generate_password_hash("secure123")
+            "Fiona", "Taylor", "fiona@gmail.com", generate_password_hash(
+                "secure123")
         )
 
         create_log(user4.id, "User signed up")
@@ -96,7 +100,21 @@ def init_db():
             50.0,
         )
         create_bill(
-            user2.id, [user1.id], [expense2.id], "Taxi Bill", "Transport", 2, 30.0
+            user2.id, [user1.id], [
+                expense2.id], "Taxi Bill", "Transport", 2, 30.0
+        )
+        create_bill(
+            user1.id,
+            [user2.id, user3.id],
+            [expense1.id],
+            "Dinner Bill",
+            "Food",
+            1,
+            50.0,
+        )
+        create_bill(
+            user2.id, [user1.id], [
+                expense2.id], "Taxi Bill", "Transport", 2, 30.0
         )
 
         create_split(expense1.id, user1.id, 30)
@@ -110,7 +128,10 @@ def init_db():
 
 
 def create_user(name, surname, mail, password, admin=False):
-    user = User(name=name, surname=surname, mail=mail, password=password, admin=admin)
+    user = User(name=name, surname=surname, mail=mail,
+                password=password, admin=admin)
+    user = User(name=name, surname=surname, mail=mail,
+                password=password, admin=admin)
     db.session.add(user)
     db.session.commit()
     logger.info(f"User created: {user.name} {user.surname}")
@@ -150,11 +171,19 @@ def create_expense(name, currency, price):
 
 
 def create_split(expense_id, user_id, split_amount):
-    split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
+    split = Split(expense_id=expense_id, user_id=user_id,
+                  split_amount=split_amount)
+    split = Split(expense_id=expense_id, user_id=user_id,
+                  split_amount=split_amount)
     db.session.add(split)
     db.session.commit()
     logger.info(f"Split created: {expense_id}, Price: {split_amount}")
     return split
+
+
+def create_bill(
+    user_creator_id, user_added_ids, expense_ids, name, label, status, total_sum
+):
 
 
 def create_bill(
@@ -165,6 +194,7 @@ def create_bill(
         name=name,
         label=label,
         status=status,
+        total_sum=total_sum,
         total_sum=total_sum,
     )
     db.session.add(bill)
@@ -182,7 +212,8 @@ def create_bill(
 
     db.session.commit()
     logger.info(
-        f"Bill created: {name}, Total Sum: {total_sum}, Users: {user_added_ids}, Expenses: {expense_ids}"
+        f"Bill created: {name}, Total Sum: {total_sum}, Users: {
+            user_added_ids}, Expenses: {expense_ids}"
     )
 
 
@@ -195,5 +226,5 @@ def create_friendship(user_id_1, user_id_2):
     db.session.commit()
     logger.info(
         f"Friendship {friendship.id} created between user {
-                user_id_1} and user {user_id_2}"
+            user_id_1} and user {user_id_2}"
     )
