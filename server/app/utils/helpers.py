@@ -1,5 +1,10 @@
-
 import logging
+from flask import request
+from flask_jwt_extended import get_jwt_identity
+from app.models import Log
+import time
+from app import db
+from sqlalchemy import func
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -7,14 +12,16 @@ logging.basicConfig(level=logging.INFO,
 
 def log_wrapper(func):
     def wrapper(*args, **kwargs):
-        logging.info(
-            f"Wywołanie funkcji '{func.__name__}' z argumentami: {args}, {kwargs}")
+        jwt_identity = get_jwt_identity()
+        endpoint = request.path
+        t1 = time.time()
+        response = func(*args, **kwargs)
+        t2 = time.time()
 
-        result = func(*args, **kwargs)
+        log_data = f"wywołał endpoint: {endpoint}, status: {response[1]}, wynik: {response[0]}, czas:{t2-t1:.4f}s"
+        create_log(jwt_identity, log_data)
 
-        logging.info(f"Funkcja '{func.__name__}' zakończona. Wynik: {result}")
-
-        return result
+        return response
     return wrapper
 
 
@@ -29,3 +36,9 @@ def serialize_bill(bill):
         "created_at": bill.created_at,
         "users": [user.id for user in bill.users]
     }
+
+
+def create_log(user_id, data):
+    log = Log(user_id=user_id, data=data, created_at=func.now())
+    db.session.add(log)
+    db.session.commit()
