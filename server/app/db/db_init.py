@@ -190,7 +190,6 @@ def create_bill(
         label=label,
         status=status,
         total_sum=total_sum,
-        total_sum=total_sum,
     )
     db.session.add(bill)
     db.session.commit()
