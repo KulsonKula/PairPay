@@ -184,11 +184,6 @@ def create_split(expense_id, user_id, split_amount):
 def create_bill(
     user_creator_id, user_added_ids, expense_ids, name, label, status, total_sum
 ):
-
-
-def create_bill(
-    user_creator_id, user_added_ids, expense_ids, name, label, status, total_sum
-):
     bill = Bill(
         user_creator_id=user_creator_id,
         name=name,
