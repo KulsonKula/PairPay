@@ -10,7 +10,6 @@ from app.services.bill_service import (
     delete_bill,
     invite_user_to_bill,
 )
-from app.utils.helpers import serialize_bill
 from app import db
 from http import HTTPStatus
 from sqlalchemy.exc import SQLAlchemyError
@@ -88,7 +87,7 @@ def get_specific_bill(bill_id):
                 HTTPStatus.NOT_FOUND,
             )
 
-        return jsonify({"bill": serialize_bill(bill)}), HTTPStatus.OK
+        return jsonify({"bill": bill.to_dict()}), HTTPStatus.OK
 
     except SQLAlchemyError as e:
         logger.error(
@@ -136,9 +135,7 @@ def create_bill():
         logger.info(f"Bill created with ID {bill.id} by user {current_user}")
 
         return (
-            jsonify(
-                {"message": "Bill created successfully", "bill": serialize_bill(bill)}
-            ),
+            jsonify({"message": "Bill created successfully", "bill": bill.to_dict()}),
             HTTPStatus.CREATED,
         )
     except SQLAlchemyError as e:
@@ -187,9 +184,7 @@ def modify_specific_bill(bill_id):
         logger.info(f"Bill with ID {bill.id} modified by user {current_user}")
 
         return (
-            jsonify(
-                {"message": "Bill updated successfully", "bill": serialize_bill(bill)}
-            ),
+            jsonify({"message": "Bill updated successfully", "bill": bill.to_dict()}),
             HTTPStatus.OK,
         )
 
