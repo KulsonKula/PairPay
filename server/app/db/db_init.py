@@ -10,6 +10,7 @@ from app.models import (
     user_group,
     bill_user,
     Invitation,
+    expense_user,
 )
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
@@ -24,6 +25,7 @@ def init_db():
     try:
         db.session.execute(user_group.delete())
         db.session.execute(bill_user.delete())
+        db.session.execute(expense_user.delete())
 
         db.session.query(Log).delete()
         db.session.query(Invitation).delete()

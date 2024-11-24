@@ -1,6 +1,6 @@
 from logging import Logger
 from app import db
-from app.models import Expense, Bill
+from app.models import Expense, Bill, User
 from sqlalchemy.exc import SQLAlchemyError
 from http import HTTPStatus
 
@@ -13,6 +13,18 @@ class ExpenseService:
 
     def get_expenses(self, bill_id):
         try:
+            bill = Bill.query.get(bill_id)
+            if not bill:
+                return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
+
+            if (
+                self.current_user not in [user.id for user in bill.users]
+                and self.current_user != bill.user_creator_id
+            ):
+                return {
+                    "message": "User is not a participant of the bill"
+                }, HTTPStatus.FORBIDDEN
+
             expenses = Expense.query.filter_by(bill_id=bill_id).all()
             return {
                 "expenses": [expense.to_dict() for expense in expenses]
@@ -32,28 +44,20 @@ class ExpenseService:
             if not bill:
                 return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
 
-            if self.current_user.id not in [
-                user.id for user in bill.users + [bill.user_creator_id]
-            ]:
-                return {
-                    "message": "User is not a participant of the bill"
-                }, HTTPStatus.FORBIDDEN
-
-            expense = Expense.query.filter_by(id=expense_id, bill_id=bill_id).first()
-
-            if not expense:
-                return {"message": "Expense not found"}, HTTPStatus.NOT_FOUND
-
-            bill = Bill.query.get(bill_id)
-            if not bill or (
-                self.current_user.id
-                not in [user.id for user in bill.users + [bill.user_creator_id]]
+            if (
+                self.current_user not in [user.id for user in bill.users]
+                and self.current_user != bill.user_creator_id
             ):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
 
+            expense = Expense.query.filter_by(id=expense_id, bill_id=bill_id).first()
+            if not expense:
+                return {"message": "Expense not found"}, HTTPStatus.NOT_FOUND
+
             return {"expense": expense.to_dict()}, HTTPStatus.OK
+
         except SQLAlchemyError as e:
             return {
                 "message": f"Database error: {str(e)}"
@@ -69,9 +73,15 @@ class ExpenseService:
             if not bill:
                 return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
 
-            if self.current_user.id not in [
-                user.id for user in bill.users + [bill.user_creator_id]
-            ]:
+            logger.info(
+                f"Current user: {self.current_user}, Bill creator: {bill.user_creator_id}, "
+                f"Participants: {[user.id for user in bill.users]}"
+            )
+
+            if (
+                self.current_user not in [user.id for user in bill.users]
+                and self.current_user != bill.user_creator_id
+            ):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
@@ -84,12 +94,19 @@ class ExpenseService:
                 bill_id=bill_id,
             )
 
+            users = expense_data.get("users", [])
+            if users:
+                valid_users = [user.id for user in bill.users] + [bill.user_creator_id]
+                valid_users = User.query.filter(User.id.in_(valid_users)).all()
+                for user in valid_users:
+                    if user.id in users:
+                        expense.users.append(user)
+
             db.session.add(expense)
             db.session.commit()
 
             logger.info(
-                f"Bill created with ID {
-                    expense.id} by user {self.current_user}"
+                f"Expense created with ID {expense.id} by user {self.current_user}"
             )
 
             return {"expense": expense.to_dict()}, HTTPStatus.CREATED
@@ -110,19 +127,30 @@ class ExpenseService:
                 return {"message": "Expense not found"}, HTTPStatus.NOT_FOUND
 
             bill = expense.bill
-            if not bill or (
-                self.current_user.id
-                not in [user.id for user in bill.users + [bill.user_creator_id]]
+            if (
+                self.current_user not in [user.id for user in bill.users]
+                and self.current_user != bill.user_creator_id
             ):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
 
-            self._update_expense_fields(expense, expense_data)
+            users = expense_data.get("users", [])
+            if users:
+                valid_users = [user.id for user in bill.users] + [bill.user_creator_id]
+                valid_users = User.query.filter(User.id.in_(valid_users)).all()
 
+                expense.users = [
+                    user for user in expense.users if user.id in valid_users
+                ]
+                for user in valid_users:
+                    if user.id in users and user not in expense.users:
+                        expense.users.append(user)
+
+            self._update_expense_fields(expense, expense_data)
             db.session.commit()
 
-            logger.info(f"Expense {expense_id} modified by user {self.current_user.id}")
+            logger.info(f"Expense {expense_id} modified by user {self.current_user}")
 
             return {"expense": expense.to_dict()}, HTTPStatus.OK
         except SQLAlchemyError as e:
@@ -142,17 +170,18 @@ class ExpenseService:
                 return {"message": "Expense not found"}, HTTPStatus.NOT_FOUND
 
             bill = expense.bill
-            if not bill or (
-                self.current_user.id
-                not in [user.id for user in bill.users + [bill.user_creator_id]]
+            if (
+                self.current_user not in [user.id for user in bill.users]
+                and self.current_user != bill.user_creator_id
             ):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
+
             db.session.delete(expense)
             db.session.commit()
 
-            logger.info(f"Expense {expense_id} deleted by user {self.current_user.id}")
+            logger.info(f"Expense {expense_id} deleted by user {self.current_user}")
 
             return {"message": "Expense deleted successfully"}, HTTPStatus.OK
         except SQLAlchemyError as e:
