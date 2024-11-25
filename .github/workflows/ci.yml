@@ -10,7 +10,7 @@ on:
 
 jobs:
   black:
-    runs-on: [self-hosted, solinas-medium]
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4

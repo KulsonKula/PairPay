@@ -194,8 +194,8 @@ class ExpenseService:
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def _update_expense_fields(expense, expense_data):
-        updatable_fields = ["name", "currency", "price", "payer"]
+    def _update_expense_fields(self, expense, expense_data):
+        updatable_fields = ["name", "currency", "price", "payer", "users"]
         for field in updatable_fields:
             if field in expense_data:
                 setattr(expense, field, expense_data[field])

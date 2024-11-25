@@ -6,3 +6,4 @@ from .group import Group, user_group
 from .invitation import Invitation, InvitationStatus
 from .TokenBlocklist import TokenBlocklist
 from .split import Split
+from .friendship import Friendship
