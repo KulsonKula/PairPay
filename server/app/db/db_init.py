@@ -25,11 +25,10 @@ def init_db():
     try:
         db.session.execute(user_group.delete())
         db.session.execute(bill_user.delete())
-
         db.session.query(ExpenseParticipant).delete()
+        db.session.query(Split).delete()
         db.session.query(Log).delete()
         db.session.query(Invitation).delete()
-        db.session.query(Split).delete()
         db.session.query(Expense).delete()
         db.session.query(Bill).delete()
         db.session.query(Group).delete()

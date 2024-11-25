@@ -44,12 +44,13 @@ def del_user():
         return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-@user_bp.route("/api/user/update", methods=["POST"])
+@user_bp.route("/api/user/update", methods=["PUT"])
 @jwt_required()
 def update_user():
     try:
-        user = get_jwt_identity()
+        user_id = get_jwt_identity()
         data = request.get_json()
+        user = User.query.get(user_id)
 
         update_user_fields(user, data)
         db.session.commit()
