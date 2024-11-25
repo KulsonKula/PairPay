@@ -19,8 +19,9 @@ class User(db.Model):
     )
 
     bills = db.relationship("Bill", secondary="bill_user", back_populates="users")
-    expenses = db.relationship(
-        "Expense", secondary="expense_user", back_populates="users"
+
+    expenses_participated = db.relationship(
+        "Expense", secondary="expense_participant", back_populates="participants"
     )
 
     groups_led = db.relationship(

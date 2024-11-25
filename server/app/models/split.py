@@ -1,5 +1,7 @@
 from app import db
 
+# TODO remove this
+
 
 class Split(db.Model):
     __tablename__ = "split"

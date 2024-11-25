@@ -10,7 +10,7 @@ from app.models import (
     user_group,
     bill_user,
     Invitation,
-    expense_user,
+    ExpenseParticipant,
 )
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
@@ -25,8 +25,8 @@ def init_db():
     try:
         db.session.execute(user_group.delete())
         db.session.execute(bill_user.delete())
-        db.session.execute(expense_user.delete())
 
+        db.session.query(ExpenseParticipant).delete()
         db.session.query(Log).delete()
         db.session.query(Invitation).delete()
         db.session.query(Split).delete()
@@ -75,8 +75,8 @@ def init_db():
         )
         bill2 = create_bill(user2.id, [user1.id], "Taxi Bill", "Transport", 2, 30.0)
 
-        expense1 = create_expense("Dinner", 1, 50.0, user1.id, bill1.id)
-        expense2 = create_expense("Taxi", 1, 30.0, user2.id, bill2.id)
+        expense1 = create_expense("Dinner", "USD", 50.0, user1.id, bill1.id)
+        expense2 = create_expense("Taxi", "USD", 30.0, user2.id, bill2.id)
 
         create_split(expense1.id, user1.id, 30)
         create_split(expense1.id, user2.id, 40)
@@ -122,7 +122,7 @@ def add_user_to_group(group, user):
 
 def create_expense(name, currency, price, payer, bill_id):
     expense = Expense(
-        name=name, currency=currency, price=price, payer=payer, bill_id=bill_id
+        name=name, currency=currency, price=price, payer_id=payer, bill_id=bill_id
     )
     db.session.add(expense)
     db.session.commit()
