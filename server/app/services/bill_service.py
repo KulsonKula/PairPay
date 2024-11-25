@@ -5,8 +5,6 @@ from app import db
 from http import HTTPStatus
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.utils.helpers import serialize_bill
-
 logger = getLogger(__name__)
 
 
@@ -16,8 +14,7 @@ class BillSerivce:
 
     def get_created_bills(self):
         try:
-            bills = Bill.query.filter_by(
-                user_creator_id=self.current_user).all()
+            bills = Bill.query.filter_by(user_creator_id=self.current_user).all()
             bills_data = [bill.to_dict() for bill in bills]
             logger.info(f"Bills data: {bills_data}")
             return {"bills": bills_data}, HTTPStatus.OK
@@ -60,7 +57,7 @@ class BillSerivce:
                     HTTPStatus.NOT_FOUND,
                 )
 
-            return {"bill": serialize_bill(bill)}, HTTPStatus.OK
+            return {"bill": bill.to_dict()}, HTTPStatus.OK
         except SQLAlchemyError as e:
             return {
                 "message": f"Database error: {str(e)}"
@@ -88,7 +85,7 @@ class BillSerivce:
             )
             return (
                 {
-                    "bill": serialize_bill(bill),
+                    "bill": bill.to_dict(),
                 },
                 HTTPStatus.CREATED,
             )
@@ -127,7 +124,7 @@ class BillSerivce:
                     bill.id} modified by user {self.current_user}"
             )
             return (
-                {"bill": serialize_bill(bill)},
+                {"bill": bill.to_dict()},
                 HTTPStatus.OK,
             )
         except SQLAlchemyError as e:

@@ -5,6 +5,7 @@ from app.db import db
 from app.routes.bill_api import bill_bp
 from app.routes.user_api import user_bp
 from app.routes.friendship_api import friend_bp
+from app.routes.expense_api import expense_bp
 from app.routes.auth import auth_bp
 from app.db.db_init import init_db
 from flask_jwt_extended import JWTManager
@@ -38,6 +39,7 @@ class AppFactory:
         self.app.register_blueprint(user_bp)
         self.app.register_blueprint(bill_bp, url_prefix="/api")
         self.app.register_blueprint(friend_bp, url_prefix="/api")
+        self.app.register_blueprint(expense_bp, url_prefix="/api")
 
     def _initialize_db(self):
         db.init_app(self.app)
