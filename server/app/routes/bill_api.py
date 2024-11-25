@@ -7,7 +7,7 @@ from app.utils.helpers import serialize_bill
 from app import db
 from http import HTTPStatus
 from sqlalchemy.exc import SQLAlchemyError
-
+from ..utils.helpers import make_log_wrapper
 
 bill_bp = Blueprint('bill_bp', __name__)
 logger = getLogger(__name__)
@@ -98,6 +98,7 @@ def get_specific_bill(bill_id):
 
 @bill_bp.route('/api/create-bill', methods=['POST'])
 @jwt_required()
+@make_log_wrapper
 def create_bill():
     current_user = get_jwt_identity()
 
@@ -138,6 +139,7 @@ def create_bill():
 
 @bill_bp.route('/api/bills/<int:bill_id>', methods=['PUT'])
 @jwt_required()
+@make_log_wrapper
 def modify_specific_bill(bill_id):
     current_user = get_jwt_identity()
 
@@ -176,6 +178,7 @@ def modify_specific_bill(bill_id):
 
 @bill_bp.route('/api/bills/<int:bill_id>', methods=['DELETE'])
 @jwt_required()
+@make_log_wrapper
 def delete_specific_bill(bill_id):
     current_user = get_jwt_identity()
     try:
@@ -194,6 +197,7 @@ def delete_specific_bill(bill_id):
 
 @bill_bp.route('/api/bills/<int:bill_id>/invite', methods=['POST'])
 @jwt_required()
+@make_log_wrapper
 def invite_to_bill(bill_id):
     current_user = get_jwt_identity()
     invite_data = request.get_json()

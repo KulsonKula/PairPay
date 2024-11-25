@@ -20,7 +20,7 @@ def make_log_wrapper(func):
         response = func(*args, **kwargs)
         t2 = time.time()
 
-        log_data = f"wywołał endpoint: {endpoint}, status: {response[1]}, wynik: {response[0]}, czas:{t2-t1:.4f}s"
+        log_data = f"called endpoint: {endpoint}, status: {response[1]}, result: {response[0]}, time: {t2-t1:.4f}s"
         create_log(jwt_identity, log_data)
 
         return response
