@@ -1,92 +1,283 @@
-from sqlalchemy import or_
-from app.models import Bill, bill_user, Invitation
+from logging import getLogger
+
+from app.models import User, Bill, bill_user, Invitation, InvitationStatus
 from app import db
+from http import HTTPStatus
+from sqlalchemy.exc import SQLAlchemyError
+
+from app.utils.helpers import serialize_bill
+
+logger = getLogger(__name__)
 
 
-def get_bills_for_user_creator(user_id):
-    return (
-        Bill.query.outerjoin(bill_user)
-        .filter(Bill.user_creator_id == user_id)
-        .distinct()
-        .all()
-    )
+class BillSerivce:
+    def __init__(self, current_user):
+        self.current_user = current_user
 
+    def get_created_bills(self):
+        try:
+            bills = Bill.query.filter_by(
+                user_creator_id=self.current_user).all()
+            bills_data = [bill.to_dict() for bill in bills]
+            logger.info(f"Bills data: {bills_data}")
+            return {"bills": bills_data}, HTTPStatus.OK
+        except SQLAlchemyError as e:
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-def get_bills_for_user_assigned(user_id):
-    return (
-        Bill.query.outerjoin(bill_user)
-        .filter(bill_user.c.user_id == user_id)
-        .distinct()
-        .all()
-    )
+    def get_assigned_bills(self):
+        try:
+            bills = (
+                Bill.query.outerjoin(bill_user)
+                .filter(bill_user.c.user_id == self.current_user)
+                .distinct()
+                .all()
+            )
+            bills_data = [bill.to_dict() for bill in bills]
+            logger.info(f"Bills data: {bills_data}")
+            return {"bills": bills_data}, HTTPStatus.OK
+        except SQLAlchemyError as e:
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def get_specific_bill(self, bill_id):
+        try:
+            bill = Bill.query.get(bill_id)
 
-def get_bill_for_user(bill_id, current_user):
-    bill = Bill.query.filter(
-        Bill.id == bill_id,
-        (Bill.user_creator_id == current_user) | (Bill.users.any(id=current_user)),
-    ).first()
+            if not bill:
+                return (
+                    {"message": "Bill not found or you do not have access to it"},
+                    HTTPStatus.NOT_FOUND,
+                )
 
-    return bill
+            return {"bill": serialize_bill(bill)}, HTTPStatus.OK
+        except SQLAlchemyError as e:
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def create_bill(self, bill_data):
+        try:
+            bill = Bill(
+                user_creator_id=self.current_user,
+                name=bill_data.get("name"),
+                label=bill_data.get("label"),
+                status=bill_data.get("status"),
+                total_sum=bill_data.get("total_sum"),
+            )
 
-def update_bill_fields(bill, bill_data):
-    updatable_fields = ["name", "label", "status", "total_sum"]
-    for field in updatable_fields:
-        if field in bill_data:
-            setattr(bill, field, bill_data[field])
+            db.session.add(bill)
+            db.session.commit()
+            logger.info(
+                f"Bill created with ID {
+                    bill.id} by user {self.current_user}"
+            )
+            return (
+                {
+                    "bill": serialize_bill(bill),
+                },
+                HTTPStatus.CREATED,
+            )
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def modify_bill(self, bill_id, bill_data):
+        try:
+            bill = Bill.query.filter_by(
+                id=bill_id, user_creator_id=self.current_user
+            ).first()
 
-# def update_bill_users(bill, new_user_ids):
-#     if not new_user_ids:
-#         return
+            if not bill:
+                logger.warning(
+                    f"Bill with ID {bill_id} not found or user {
+                        self.current_user} is not the creator"
+                )
+                return (
+                    {
+                        "message": "Bill not found or you are not authorized to modify it"
+                    },
+                    HTTPStatus.NOT_FOUND,
+                )
 
-#     current_user_ids = {user.id for user in bill.users}
-#     new_user_ids = set(new_user_ids)
+            self._update_bill_fields(bill, bill_data)
+            db.session.commit()
+            logger.info(
+                f"Bill with ID {
+                    bill.id} modified by user {self.current_user}"
+            )
+            return (
+                {"bill": serialize_bill(bill)},
+                HTTPStatus.OK,
+            )
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-#     users_to_add = new_user_ids - current_user_ids
-#     users_to_remove = current_user_ids - new_user_ids
+    def delete_bill(self, bill_id):
+        try:
+            bill = Bill.query.filter_by(
+                id=bill_id, user_creator_id=self.current_user
+            ).first()
 
-#     if users_to_add:
-#         new_users = User.query.filter(User.id.in_(users_to_add)).all()
-#         for user in new_users:
-#             if user not in bill.users:
-#                 bill.users.append(user)
+            if not bill:
+                return (
+                    {"message": "Bill not found"},
+                    HTTPStatus.NOT_FOUND,
+                )
 
-#     if users_to_remove:
-#         users_to_remove_objs = User.query.filter(
-#             User.id.in_(users_to_remove)).all()
-#         for user in users_to_remove_objs:
-#             if user in bill.users:
-#                 bill.users.remove(user)
+            db.session.delete(bill)
+            db.session.commit()
+            return (
+                {"message": f"Bill {bill.id} deleted successfully"},
+                HTTPStatus.OK,
+            )
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def invite_to_bill(self, bill_id, invitee_id):
+        try:
+            if not invitee_id:
+                return (
+                    {"message": "Invitee ID is required"},
+                    HTTPStatus.BAD_REQUEST,
+                )
 
-def delete_bill(bill_id, current_user):
-    bill = Bill.query.filter_by(id=bill_id, user_creator_id=current_user).first()
+            bill = Bill.query.filter_by(
+                id=bill_id, user_creator_id=self.current_user
+            ).first()
 
-    if not bill:
-        return None, "Bill not found or user does not have access"
+            if not bill:
+                return (
+                    {"message": "Only creator of the bill can invite users"},
+                    HTTPStatus.FORBIDDEN,
+                )
+            if any(user.id == invitee_id for user in bill.users):
+                return (
+                    {"message": "User is already part of the bill"},
+                    HTTPStatus.BAD_REQUEST,
+                )
 
-    db.session.delete(bill)
-    db.session.commit()
+            invitation = Invitation(
+                inviter_id=self.current_user, invitee_id=invitee_id, bill_id=bill_id
+            )
+            db.session.add(invitation)
+            db.session.commit()
 
-    return bill
+            return (
+                {
+                    "message": "Invitation sent successfully",
+                    "invitation_id": invitation.id,
+                },
+                HTTPStatus.CREATED,
+            )
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def accept_invitation(self, invitation_id):
+        try:
+            invitation = Invitation.query.filter_by(
+                id=invitation_id,
+                invitee_id=self.current_user,
+                status=InvitationStatus.PENDING,
+            ).first()
 
-def invite_user_to_bill(bill_id, current_user, invitee_id):
-    bill = Bill.query.filter_by(id=bill_id, user_creator_id=current_user).first()
+            if not invitation:
+                return (
+                    {"message": "Invitation not found or already handled"},
+                    HTTPStatus.NOT_FOUND,
+                )
 
-    if not bill:
-        raise PermissionError("Only creator of the bill can invite users")
+            bill = Bill.query.get(invitation.bill_id)
+            bill.users.append(User.query.get(self.current_user))
 
-    if any(user.id == invitee_id for user in bill.users):
-        raise ValueError("User is already part of the bill")
+            invitation.status = InvitationStatus.ACCEPTED
+            db.session.commit()
 
-    invitation = Invitation(
-        inviter_id=current_user, invitee_id=invitee_id, bill_id=bill_id
-    )
+            return {"message": "Invitation acceppted"}, HTTPStatus.OK
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    db.session.add(invitation)
-    db.session.commit()
+    def decline_invitation(self, invitation_id):
+        try:
+            invitation = Invitation.query.filter_by(
+                id=invitation_id,
+                invitee_id=self.current_user,
+                status=InvitationStatus.PENDING,
+            ).first()
 
-    return invitation
+            if not invitation:
+                return (
+                    {"message": "Invitation not found or already handled"},
+                    HTTPStatus.NOT_FOUND,
+                )
+
+            bill = Bill.query.get(invitation.bill_id)
+            bill.users.append(User.query.get(self.current_user))
+
+            invitation.status = InvitationStatus.DECLINED
+            db.session.commit()
+
+            return {"message": "Invitation declined"}, HTTPStatus.OK
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def _update_bill_fields(self, bill, bill_data):
+        updatable_fields = ["name", "label", "status", "total_sum"]
+        for field in updatable_fields:
+            if field in bill_data:
+                setattr(bill, field, bill_data[field])
