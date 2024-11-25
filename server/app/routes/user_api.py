@@ -5,6 +5,7 @@ from app.services.user_service import update_user_fields
 from http import HTTPStatus
 from app import db
 from http import HTTPStatus
+from ..utils.helpers import make_log_wrapper
 
 user_bp = Blueprint('user_bp', __name__)
 
@@ -35,6 +36,7 @@ def get_current_user():
 
 @user_bp.route('/api/user/del_user', methods=['DELETE'])
 @jwt_required()
+@make_log_wrapper
 def del_user():
     try:
         user_id = get_jwt_identity()
@@ -50,6 +52,7 @@ def del_user():
 
 @user_bp.route('/api/user/update', methods=['POST'])
 @jwt_required()
+@make_log_wrapper
 def update_user():
     try:
         user = get_jwt_identity()
@@ -65,6 +68,7 @@ def update_user():
 
 @user_bp.route('/api/user/admin/make_admin', methods=['POST'])
 @jwt_required()
+@make_log_wrapper
 def make_admin():
     try:
         current_user_id = get_jwt_identity()
@@ -86,6 +90,7 @@ def make_admin():
 
 @user_bp.route('/api/user/admin/update', methods=['POST'])
 @jwt_required()
+@make_log_wrapper
 def update_user_by_admin():
     try:
         current_user_id = get_jwt_identity()

@@ -5,13 +5,15 @@ from app.models import Log
 import time
 from app import db
 from sqlalchemy import func
+from functools import wraps
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def log_wrapper(func):
-    def wrapper(*args, **kwargs):
+def make_log_wrapper(func):
+    @wraps(func)
+    def wrapper_fc(*args, **kwargs):
         jwt_identity = get_jwt_identity()
         endpoint = request.path
         t1 = time.time()
@@ -22,7 +24,7 @@ def log_wrapper(func):
         create_log(jwt_identity, log_data)
 
         return response
-    return wrapper
+    return wrapper_fc
 
 
 def serialize_bill(bill):
