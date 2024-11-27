@@ -4,6 +4,8 @@ from app.config import config_by_name
 from app.db import db
 from app.routes.bill_api import bill_bp
 from app.routes.user_api import user_bp
+from app.routes.friendship_api import friend_bp
+from app.routes.expense_api import expense_bp
 from app.routes.auth import auth_bp
 from app.db.db_init import init_db
 from flask_jwt_extended import JWTManager
@@ -16,18 +18,28 @@ class AppFactory:
         self.app = Flask(__name__)
 
     def _load_config(self):
-        self.app.config.from_object(config_by_name.get(
-            self.config_name, config_by_name["development"]))
+        self.app.config.from_object(
+            config_by_name.get(self.config_name, config_by_name["development"])
+        )
 
     def _initialize_cors(self):
-        CORS(self.app, resources={r"/*": {"origins": self.app.config['CORS_ORIGINS'],
-                                          "methods": self.app.config['CORS_METHODS'],
-                                          "allow_headers": self.app.config['CORS_ALLOW_HEADERS']}})
+        CORS(
+            self.app,
+            resources={
+                r"/*": {
+                    "origins": self.app.config["CORS_ORIGINS"],
+                    "methods": self.app.config["CORS_METHODS"],
+                    "allow_headers": self.app.config["CORS_ALLOW_HEADERS"],
+                }
+            },
+        )
 
     def _register_blueprints(self):
         self.app.register_blueprint(auth_bp)
         self.app.register_blueprint(user_bp)
-        self.app.register_blueprint(bill_bp)
+        self.app.register_blueprint(bill_bp, url_prefix="/api")
+        self.app.register_blueprint(friend_bp, url_prefix="/api")
+        self.app.register_blueprint(expense_bp, url_prefix="/api")
 
     def _initialize_db(self):
         db.init_app(self.app)

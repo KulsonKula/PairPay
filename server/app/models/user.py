@@ -3,7 +3,7 @@ from sqlalchemy_utils import EmailType
 
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     # moze zmiana na uuid byla by lepsza
     id = db.Column(db.Integer, primary_key=True, index=True)
@@ -18,8 +18,10 @@ class User(db.Model):
         "Bill", foreign_keys="[Bill.user_creator_id]", back_populates="user_creator"
     )
 
-    bills = db.relationship("Bill", secondary="bill_user",
-                            back_populates="users")
+    bills = db.relationship("Bill", secondary="bill_user", back_populates="users")
+    expenses = db.relationship(
+        "Expense", secondary="expense_user", back_populates="users"
+    )
 
     groups_led = db.relationship(
         "Group", back_populates="lider", foreign_keys="[Group.user_lider]"

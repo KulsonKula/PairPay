@@ -2,7 +2,7 @@ from app import db
 
 
 class Log(db.Model):
-    __tablename__ = 'log'
+    __tablename__ = "log"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
@@ -16,5 +16,5 @@ class Log(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "data": self.data,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }

@@ -46,7 +46,8 @@ def del_user():
         return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-@user_bp.route("/api/user/update", methods=["PUT"])
+
+@user_bp.route("/api/user/update", methods=["POST"])
 @jwt_required()
 @make_log_wrapper
 def update_user():

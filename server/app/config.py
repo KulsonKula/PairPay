@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 from datetime import timedelta
 
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env.dev"))
 
+load_dotenv(".env.dev")
 
 class Config:
     def __init__(self, env):
