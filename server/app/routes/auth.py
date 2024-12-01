@@ -14,7 +14,7 @@ from http import HTTPStatus
 from flask_jwt_extended import get_jwt
 from app.models import *
 from datetime import datetime, timezone
-from utils.helpers import send_mail, create_auth_mail
+from app.utils.helpers import send_mail, create_auth_mail
 
 
 auth_bp = Blueprint("auth_bp", __name__)
@@ -109,13 +109,11 @@ def blacklist_token():
 
 
 @auth_bp.route("/api/activate", methods=["POST"])
-@jwt_required()
 def activate_account():
-    data = request.json()
-    token = data.get("token")
+    token = request.args.get("token")
     try:
-        decode_token = decode_token(token)
-        user_id = decode_token.user["sub"]["user_id"]
+        decoded_token = decode_token(token)
+        user_id = decoded_token["sub"]["user_id"]
 
         user = User.query.get(user_id)
         if not user:
@@ -126,7 +124,7 @@ def activate_account():
                 HTTPStatus.OK,
             )
         user.is_activated = True
-        db.commit()
+        db.session.commit()
         return jsonify({"message": "User activated."}), HTTPStatus.OK
     except Exception as e:
         return (

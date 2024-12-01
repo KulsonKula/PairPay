@@ -29,6 +29,6 @@ logging.basicConfig(level=TRACE_LEVEL_NUM, handlers=[console_handler])
 console_handler.setLevel(logging.INFO)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app(config_name="development")
     app.run(host="0.0.0.0", port=5000, debug=True)

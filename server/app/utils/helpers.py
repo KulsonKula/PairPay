@@ -1,5 +1,5 @@
 import logging
-from flask import request
+from flask import app, request
 from flask_jwt_extended import get_jwt_identity
 from app.models import Log
 import time
@@ -7,7 +7,7 @@ from app import db
 from sqlalchemy import func
 from functools import wraps
 from flask_mail import Message
-import app
+from app.db import mail
 
 from flask_jwt_extended import (
     create_access_token,
@@ -17,6 +17,8 @@ from flask_jwt_extended import (
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+logger = logging.getLogger(__name__)
 
 
 def make_log_wrapper(func):
@@ -56,8 +58,7 @@ def create_log(user_id, data):
 
 
 def send_mail(subject, recipients, body):
-    msg = Message(subject, recipients=recipients, body=body)
-    mail = app.extensions["mail"]
+    msg = Message(subject, recipients=[recipients], body=body)
     mail.send(msg)
 
 
