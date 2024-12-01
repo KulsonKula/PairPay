@@ -6,9 +6,17 @@ import time
 from app import db
 from sqlalchemy import func
 from functools import wraps
+from flask_mail import Message
+import app
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+from flask_jwt_extended import (
+    create_access_token,
+    get_jwt_identity,
+)
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 def make_log_wrapper(func):
@@ -24,6 +32,7 @@ def make_log_wrapper(func):
         create_log(jwt_identity, log_data)
 
         return response
+
     return wrapper_fc
 
 
@@ -36,7 +45,7 @@ def serialize_bill(bill):
         "status": bill.status,
         "total_sum": bill.total_sum,
         "created_at": bill.created_at,
-        "users": [user.id for user in bill.users]
+        "users": [user.id for user in bill.users],
     }
 
 
@@ -44,3 +53,16 @@ def create_log(user_id, data):
     log = Log(user_id=user_id, data=data, created_at=func.now())
     db.session.add(log)
     db.session.commit()
+
+
+def send_mail(subject, recipients, body):
+    msg = Message(subject, recipients=recipients, body=body)
+    mail = app.extensions["mail"]
+    mail.send(msg)
+
+
+def create_auth_mail(user_id):
+    access_token = create_access_token(
+        identity={"user_id": user_id}, expires_delta=False
+    )
+    return f"http://127.0.0.1:5000/api/activate?token={access_token}"

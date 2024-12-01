@@ -10,12 +10,14 @@ from app.routes.auth import auth_bp
 from app.db.db_init import init_db
 from flask_jwt_extended import JWTManager
 from app.models import TokenBlocklist
+from flask_mail import Mail
 
 
 class AppFactory:
     def __init__(self, config_name="development"):
         self.config_name = config_name
         self.app = Flask(__name__)
+        self.mail = Mail()
 
     def _load_config(self):
         self.app.config.from_object(
@@ -55,12 +57,16 @@ class AppFactory:
             jti = jwt_payload["jti"]
             return TokenBlocklist.query.filter_by(jti=jti).first() is not None
 
+    def _initialize_mail(self):
+        self.mail.init_app(self.app)
+
     def create_app(self):
         self._load_config()
         self._initialize_cors()
         self._initialize_db()
         self._initialize_jwt()
         self._register_blueprints()
+        self._initialize_mail()
         return self.app
 
 

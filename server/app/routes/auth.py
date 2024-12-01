@@ -4,6 +4,7 @@ from flask_jwt_extended import (
     create_refresh_token,
     get_jwt_identity,
     jwt_required,
+    decode_token,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User
@@ -13,6 +14,8 @@ from http import HTTPStatus
 from flask_jwt_extended import get_jwt
 from app.models import *
 from datetime import datetime, timezone
+from utils.helpers import send_mail, create_auth_mail
+
 
 auth_bp = Blueprint("auth_bp", __name__)
 
@@ -48,7 +51,12 @@ def register():
 
         db.session.add(new_user)
         db.session.commit()
-
+        link = create_auth_mail(new_user.id)
+        send_mail(
+            subject="Activate your account!",
+            recipients=mail,
+            body=f"Click link to acctivate your account:\n {link}",
+        )
         return jsonify({"msg": "User successfully registered"}), HTTPStatus.CREATED
 
     except Exception as e:
@@ -98,6 +106,33 @@ def blacklist_token():
     db.session.add(TokenBlocklist(jti=jti, created_at=now))
     db.session.commit()
     return jsonify(msg="JWT revoked")
+
+
+@auth_bp.route("/api/activate", methods=["POST"])
+@jwt_required()
+def activate_account():
+    data = request.json()
+    token = data.get("token")
+    try:
+        decode_token = decode_token(token)
+        user_id = decode_token.user["sub"]["user_id"]
+
+        user = User.query.get(user_id)
+        if not user:
+            return (jsonify({"message": "User not found"}), HTTPStatus.NOT_FOUND)
+        if user.is_activated:
+            return (
+                jsonify({"message": "User is allready activated"}),
+                HTTPStatus.OK,
+            )
+        user.is_activated = True
+        db.commit()
+        return jsonify({"message": "User activated."}), HTTPStatus.OK
+    except Exception as e:
+        return (
+            jsonify({"message": "Unexpected error occurred", "details": str(e)}),
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
 
 
 # @user_bp.route('/api/user/password_reset', methods=['POST'])

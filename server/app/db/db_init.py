@@ -47,7 +47,8 @@ def init_db():
             True,
         )
         user2 = create_user(
-            "Bob", "Jones", "bob@gmail.com", generate_password_hash("anotherpass")
+            "Bob", "Jones", "bob@gmail.com", generate_password_hash(
+                "anotherpass")
         )
         user3 = create_user(
             "Charlie",
@@ -56,13 +57,16 @@ def init_db():
             generate_password_hash("password123"),
         )
         user4 = create_user(
-            "David", "Miller", "david@gmail.com", generate_password_hash("pass456")
+            "David", "Miller", "david@gmail.com", generate_password_hash(
+                "pass456"), True
         )
         user5 = create_user(
-            "Emma", "Wilson", "emma@gmail.com", generate_password_hash("pass789")
+            "Emma", "Wilson", "emma@gmail.com", generate_password_hash(
+                "pass789"), True
         )
         user6 = create_user(
-            "Fiona", "Taylor", "fiona@gmail.com", generate_password_hash("secure123")
+            "Fiona", "Taylor", "fiona@gmail.com", generate_password_hash(
+                "secure123"), True
         )
 
         create_log(user4.id, "User signed up")
@@ -91,7 +95,8 @@ def init_db():
             1,
             50.0,
         )
-        bill2 = create_bill(user2.id, [user1.id], "Taxi Bill", "Transport", 2, 30.0)
+        bill2 = create_bill(user2.id, [user1.id],
+                            "Taxi Bill", "Transport", 2, 30.0)
 
         expense1 = create_expense("Dinner", 1, 50.0, user1.id, bill1.id)
         expense2 = create_expense("Taxi", 1, 30.0, user2.id, bill2.id)
@@ -106,9 +111,9 @@ def init_db():
         logger.error(f"Error during DB initialization: {e}")
 
 
-def create_user(name, surname, mail, password, admin=False):
-    user = User(name=name, surname=surname, mail=mail, password=password, admin=admin)
-    user = User(name=name, surname=surname, mail=mail, password=password, admin=admin)
+def create_user(name, surname, mail, password,is_activated, admin=False):
+    user = User(name=name, surname=surname, mail=mail,
+                password=password, admin=admin, is_activated=is_activated)
     db.session.add(user)
     db.session.commit()
     logger.info(f"User created: {user.name} {user.surname}")
@@ -150,8 +155,10 @@ def create_expense(name, currency, price, payer, bill_id):
 
 
 def create_split(expense_id, user_id, split_amount):
-    split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
-    split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
+    split = Split(expense_id=expense_id, user_id=user_id,
+                  split_amount=split_amount)
+    split = Split(expense_id=expense_id, user_id=user_id,
+                  split_amount=split_amount)
     db.session.add(split)
     db.session.commit()
     logger.info(f"Split created: {expense_id}, Price: {split_amount}")
@@ -177,7 +184,7 @@ def create_bill(user_creator_id, user_added_ids, name, label, status, total_sum)
     db.session.commit()
     logger.info(
         f"Bill created: {name}, Total Sum: {total_sum}, Users: {
-            
+
             user_added_ids}"
     )
     return bill

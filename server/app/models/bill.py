@@ -18,7 +18,6 @@ class Bill(db.Model):
     status = db.Column(db.Integer, nullable=False)
     total_sum = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, server_default=func.now(), nullable=False)
-
     user_creator = db.relationship(
         "User", foreign_keys=[user_creator_id], back_populates="bills_created"
     )

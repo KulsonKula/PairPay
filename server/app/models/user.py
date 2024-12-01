@@ -12,6 +12,7 @@ class User(db.Model):
     mail = db.Column(EmailType, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
     admin = db.Column(db.Boolean, default=False)
+    is_activated = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     bills_created = db.relationship(

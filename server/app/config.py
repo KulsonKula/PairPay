@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from datetime import timedelta
 
 
-load_dotenv(".env.dev")
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env.dev"))
+
 
 class Config:
     def __init__(self, env):
@@ -18,6 +19,14 @@ class Config:
         self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
         self.JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
         self.JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+
+        # Konfiguracja e-mail
+        self.MAIL_SERVER = "smtp.gmail.com"
+        self.MAIL_PORT = 587
+        self.MAIL_USE_TLS = True
+        self.MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+        self.MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+        self.MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
 
         self.configure_for_env()
 
