@@ -1,10 +1,16 @@
 from app import db
 
-expense_user = db.Table(
-    "expense_user",
-    db.Column("expense_id", db.Integer, db.ForeignKey("expense.id"), primary_key=True),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
-)
+
+class ExpenseParticipant(db.Model):
+    __tablename__ = "expense_participant"
+
+    id = db.Column(db.Integer, primary_key=True)
+    expense_id = db.Column(db.Integer, db.ForeignKey("expense.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    amount_owed = db.Column(db.Float, nullable=False)
+
+    expense = db.relationship("Expense", back_populates="participants")
+    user = db.relationship("User", back_populates="expense_participants")
 
 
 class Expense(db.Model):
@@ -18,7 +24,7 @@ class Expense(db.Model):
     bill_id = db.Column(db.Integer, db.ForeignKey("bill.id"), nullable=False)
 
     bill = db.relationship("Bill", back_populates="expenses")
-    users = db.relationship("User", secondary="expense_user", back_populates="expenses")
+    participants = db.relationship("ExpenseParticipant", back_populates="expense")
 
     def to_dict(self):
         return {

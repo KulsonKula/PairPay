@@ -12,12 +12,18 @@ class BillSerivce:
     def __init__(self, current_user):
         self.current_user = current_user
 
-    def get_created_bills(self):
+    def get_created_bills(self, page=1, per_page=5):
         try:
-            bills = Bill.query.filter_by(user_creator_id=self.current_user).all()
-            bills_data = [bill.to_dict() for bill in bills]
-            logger.info(f"Bills data: {bills_data}")
-            return {"bills": bills_data}, HTTPStatus.OK
+            bills = Bill.query.filter_by(user_creator_id=self.current_user).paginate(
+                page=page, per_page=per_page, error_out=False
+            )
+            bills_data = [bill.to_dict() for bill in bills.items]
+            return {
+                "bills": bills_data,
+                "total_items": bills.total,
+                "total_pages": bills.pages,
+                "current_page": bills.page,
+            }, HTTPStatus.OK
         except SQLAlchemyError as e:
             return {
                 "message": f"Database error: {str(e)}"
@@ -27,17 +33,21 @@ class BillSerivce:
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def get_assigned_bills(self):
+    def get_assigned_bills(self, page=1, per_page=5):
         try:
             bills = (
                 Bill.query.outerjoin(bill_user)
                 .filter(bill_user.c.user_id == self.current_user)
                 .distinct()
-                .all()
+                .paginate(page=page, per_page=per_page, error_out=False)
             )
-            bills_data = [bill.to_dict() for bill in bills]
-            logger.info(f"Bills data: {bills_data}")
-            return {"bills": bills_data}, HTTPStatus.OK
+            bills_data = [bill.to_dict() for bill in bills.items]
+            return {
+                "bills": bills_data,
+                "total_items": bills.total,
+                "total_pages": bills.pages,
+                "current_page": bills.page,
+            }, HTTPStatus.OK
         except SQLAlchemyError as e:
             return {
                 "message": f"Database error: {str(e)}"

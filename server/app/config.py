@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from datetime import timedelta
 
 
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env.dev"))
+load_dotenv(".env.dev")
 
 
 class Config:
@@ -11,7 +11,7 @@ class Config:
         self.env = env
         self.SECRET_KEY = os.getenv("SECRET_KEY")
         self.CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
-        self.CORS_ORIGINS = ["http://localhost:3000"]
+        self.CORS_ORIGINS = ["http://localhost:5173"]
         self.CORS_METHODS = ["GET", "POST", "PUT", "DELETE"]
         self.MAX_CONTENT_LENGTH = 50 * 1024 * 1024
         self.SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")

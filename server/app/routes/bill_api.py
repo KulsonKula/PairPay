@@ -1,11 +1,14 @@
+from logging import getLogger
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from http import HTTPStatus
 from sqlalchemy.exc import SQLAlchemyError
 from ..utils.helpers import make_log_wrapper
 from app.services.bill_service import BillSerivce
+
 bill_bp = Blueprint("bill_bp", __name__)
 
+logger = getLogger(__name__)
 
 
 @bill_bp.route("/bills/created", methods=["GET"])
@@ -13,8 +16,13 @@ bill_bp = Blueprint("bill_bp", __name__)
 def get_all_bills_created():
     try:
         current_user = get_jwt_identity()
+        logger.info(f"Test200: {current_user}")
+
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 5, type=int)
+
         bill_service = BillSerivce(current_user)
-        response, status_code = bill_service.get_created_bills()
+        response, status_code = bill_service.get_created_bills(page, per_page)
         return jsonify(response), status_code
     except Exception as e:
         return (
@@ -29,7 +37,11 @@ def get_all_bills_assigned():
     try:
         current_user = get_jwt_identity()
         bill_service = BillSerivce(current_user)
-        response, status_code = bill_service.get_assigned_bills()
+
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 5, type=int)
+
+        response, status_code = bill_service.get_assigned_bills(page, per_page)
         return jsonify(response), status_code
     except Exception as e:
         return (
