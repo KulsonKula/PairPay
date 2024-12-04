@@ -1,6 +1,6 @@
 from logging import Logger
 from app import db
-from app.models import Expense, Bill, User
+from app.models import Expense, Bill, User, ExpenseParticipant
 from sqlalchemy.exc import SQLAlchemyError
 from http import HTTPStatus
 
@@ -199,7 +199,22 @@ class ExpenseService:
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def _update_expense_fields(self, expense, expense_data):
-        updatable_fields = ["name", "currency", "price", "payer", "users"]
+        updatable_fields = ["name", "currency", "price", "payer", "participants"]
         for field in updatable_fields:
             if field in expense_data:
                 setattr(expense, field, expense_data[field])
+
+    def _split_expenses_equally(self, expense):
+        num_participants = len(expense.participants)
+        if num_participants > 0:
+            amount = expense.price / (num_participants + 1)
+            for user in expense.partipants:
+                expense_participant = ExpenseParticipant(
+                    expense_id=expense.id, user_id=user.id, amount_owed=amount
+                )
+                db.session.commit(expense_participant)
+
+    def _split_expenses_custom(self, expense_id):
+        expense = Expense.query.get(expense_id) + 1
+
+        return
