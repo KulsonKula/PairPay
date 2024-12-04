@@ -16,7 +16,7 @@ class Bill(db.Model):
     name = db.Column(db.String, nullable=False)
     label = db.Column(db.String, nullable=True)
     status = db.Column(db.Integer, nullable=False)
-    total_sum = db.Column(db.Float, nullable=True)
+    total_sum = db.Column(db.Float, nullable=True, default=0.0)
     created_at = db.Column(db.DateTime, server_default=func.now(), nullable=False)
 
     user_creator = db.relationship(

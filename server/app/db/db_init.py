@@ -249,9 +249,7 @@ def create_bill(user_creator_id, user_added_ids, name, label, status, total_sum)
 
     db.session.commit()
     logger.info(
-        f"Bill created: {name}, Total Sum: {total_sum}, Users: {
-
-            user_added_ids}"
+        f"Bill created: {name}, Total Sum: {total_sum}, Users: { user_added_ids}"
     )
     return bill
 
@@ -264,7 +262,6 @@ def create_friendship(user_id_1, user_id_2):
     db.session.add(friendship)
     db.session.commit()
     logger.info(
-        f"Friendship {friendship.id} created between user {
-            user_id_1} and user {user_id_2}"
+        f"Friendship {friendship.id} created between user {user_id_1} and user {user_id_2}"
     )
     return friendship

@@ -4,12 +4,15 @@ from app.models import Expense, Bill, User
 from sqlalchemy.exc import SQLAlchemyError
 from http import HTTPStatus
 
+from app.services.bill_service import BillSerivce
+
 logger = Logger(__name__)
 
 
 class ExpenseService:
     def __init__(self, current_user):
         self.current_user = current_user
+        self.bill_service = BillSerivce(current_user)
 
     def get_expenses(self, bill_id):
         try:
@@ -103,6 +106,7 @@ class ExpenseService:
                         expense.users.append(user)
 
             db.session.add(expense)
+            self.bill_service.calc_total_sum(bill.id)
             db.session.commit()
 
             logger.info(

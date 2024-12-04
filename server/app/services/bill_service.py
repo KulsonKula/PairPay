@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from app.models import User, Bill, bill_user, Invitation, InvitationStatus
+from app.models import User, Bill, bill_user, Invitation, InvitationStatus, Expense
 from app import db
 from http import HTTPStatus
 from sqlalchemy.exc import SQLAlchemyError
@@ -84,15 +84,11 @@ class BillSerivce:
                 name=bill_data.get("name"),
                 label=bill_data.get("label"),
                 status=bill_data.get("status"),
-                total_sum=bill_data.get("total_sum"),
             )
 
             db.session.add(bill)
             db.session.commit()
-            logger.info(
-                f"Bill created with ID {
-                    bill.id} by user {self.current_user}"
-            )
+            logger.info(f"Bill created with ID {bill.id} by user {self.current_user}")
             return (
                 {
                     "bill": bill.to_dict(),
@@ -117,8 +113,7 @@ class BillSerivce:
 
             if not bill:
                 logger.warning(
-                    f"Bill with ID {bill_id} not found or user {
-                        self.current_user} is not the creator"
+                    f"Bill with ID {bill_id} not found or user {    self.current_user} is not the creator"
                 )
                 return (
                     {
@@ -129,10 +124,7 @@ class BillSerivce:
 
             self._update_bill_fields(bill, bill_data)
             db.session.commit()
-            logger.info(
-                f"Bill with ID {
-                    bill.id} modified by user {self.current_user}"
-            )
+            logger.info(f"Bill with ID {bill.id} modified by user {self.current_user}")
             return (
                 {"bill": bill.to_dict()},
                 HTTPStatus.OK,
@@ -284,7 +276,12 @@ class BillSerivce:
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def _update_bill_fields(self, bill, bill_data):
-        updatable_fields = ["name", "label", "status", "total_sum"]
+        updatable_fields = ["name", "label", "status"]
         for field in updatable_fields:
             if field in bill_data:
                 setattr(bill, field, bill_data[field])
+        self.calc_total_sum(bill.id)
+
+    def calc_total_sum(bill_id):
+        expenses = Expense.query.filter_by(bill_id=bill_id).all()
+        return sum(exp.price for exp in expenses if exp.price is not None)
