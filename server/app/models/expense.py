@@ -32,5 +32,5 @@ class Expense(db.Model):
             "name": self.name,
             "currency": self.currency,
             "price": self.price,
-            "users": [user.id for user in self.users],
+            "participants": [user.id for user in self.participants],
         }

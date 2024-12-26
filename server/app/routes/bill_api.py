@@ -19,7 +19,7 @@ def get_all_bills_created():
         logger.info(f"Test200: {current_user}")
 
         page = request.args.get("page", 1, type=int)
-        per_page = request.args.get("per_page", 5, type=int)
+        per_page = request.args.get("per_page", 4, type=int)
 
         bill_service = BillSerivce(current_user)
         response, status_code = bill_service.get_created_bills(page, per_page)
@@ -39,7 +39,7 @@ def get_all_bills_assigned():
         bill_service = BillSerivce(current_user)
 
         page = request.args.get("page", 1, type=int)
-        per_page = request.args.get("per_page", 5, type=int)
+        per_page = request.args.get("per_page", 4, type=int)
 
         response, status_code = bill_service.get_assigned_bills(page, per_page)
         return jsonify(response), status_code

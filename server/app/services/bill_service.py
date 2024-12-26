@@ -12,7 +12,7 @@ class BillSerivce:
     def __init__(self, current_user):
         self.current_user = current_user
 
-    def get_created_bills(self, page=1, per_page=5):
+    def get_created_bills(self, page=1, per_page=4):
         try:
             bills = Bill.query.filter_by(user_creator_id=self.current_user).paginate(
                 page=page, per_page=per_page, error_out=False
@@ -33,7 +33,7 @@ class BillSerivce:
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def get_assigned_bills(self, page=1, per_page=5):
+    def get_assigned_bills(self, page=1, per_page=4):
         try:
             bills = (
                 Bill.query.outerjoin(bill_user)
@@ -276,12 +276,8 @@ class BillSerivce:
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def _update_bill_fields(self, bill, bill_data):
-        updatable_fields = ["name", "label", "status"]
+        updatable_fields = ["name", "label", "status", "total_sum"]
         for field in updatable_fields:
             if field in bill_data:
                 setattr(bill, field, bill_data[field])
         self.calc_total_sum(bill.id)
-
-    def calc_total_sum(bill_id):
-        expenses = Expense.query.filter_by(bill_id=bill_id).all()
-        return sum(exp.price for exp in expenses if exp.price is not None)

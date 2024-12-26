@@ -81,7 +81,7 @@ def get_friends():
         )
 
 
-@friend_bp.route("pending_requests", methods=["GET"], endpoint="get_pending_requests")
+@friend_bp.route("/pending_requests", methods=["GET"], endpoint="get_pending_requests")
 @jwt_required()
 def get_pending_requests():
     try:
