@@ -52,11 +52,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         link = create_auth_mail(new_user.id)
-        # send_mail(
-        #     subject="Activate your account!",
-        #     recipients=mail,
-        #     body=f"Click link to acctivate your account:\n {link}",
-        # )
+        send_mail(
+            subject="Activate your account!",
+            recipients=mail,
+            body=f"Click link to acctivate your account:\n {link}",
+        )
         return jsonify({"msg": "User successfully registered"}), HTTPStatus.CREATED
 
     except Exception as e:
