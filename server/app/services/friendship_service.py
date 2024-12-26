@@ -12,9 +12,16 @@ class FriendshipService:
         self.current_user = current_user
         self.debt_service = DebtService(current_user)
 
-    def send_request(self, friend_id):
+    def send_request(self, friend_email):
         try:
-            if self.current_user == friend_id:
+            friend = User.query.filter_by(mail=friend_email).first()
+
+            if not friend:
+                return {
+                    "message": "No user found with the given email"
+                }, HTTPStatus.NOT_FOUND
+
+            if self.current_user == friend.id:
                 return {
                     "message": "Error sending request to yourself"
                 }, HTTPStatus.BAD_REQUEST
@@ -22,10 +29,10 @@ class FriendshipService:
             friendship = Friendship.query.filter(
                 (
                     (Friendship.user_id == self.current_user)
-                    & (Friendship.friend_id == friend_id)
+                    & (Friendship.friend_id == friend.id)
                 )
                 | (
-                    (Friendship.user_id == friend_id)
+                    (Friendship.user_id == friend.id)
                     & (Friendship.friend_id == self.current_user)
                 )
             ).first()
@@ -48,7 +55,7 @@ class FriendshipService:
 
             new_friendship = Friendship(
                 user_id=self.current_user,
-                friend_id=friend_id,
+                friend_id=friend.id,
                 status=InvitationStatus.PENDING,
             )
             db.session.add(new_friendship)
