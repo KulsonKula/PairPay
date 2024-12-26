@@ -195,6 +195,7 @@ class ExpenseService:
 
     def _update_expense_fields(self, expense, expense_data):
         updatable_fields = ["name", "currency", "price", "payer", "participants"]
+        updatable_fields = ["name", "currency", "price", "payer", "participants"]
         for field in updatable_fields:
             if field in expense_data:
                 setattr(expense, field, expense_data[field])

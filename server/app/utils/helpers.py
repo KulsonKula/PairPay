@@ -1,7 +1,7 @@
 import logging
 from flask import app, request
 from flask_jwt_extended import get_jwt_identity
-from app.models import Log
+from app.models import Log, Expense
 import time
 from app import db
 from sqlalchemy import func
