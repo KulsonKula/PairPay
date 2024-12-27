@@ -18,7 +18,7 @@ class Expense(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     name = db.Column(db.String, nullable=False)
-    currency = db.Column(db.String, nullable=False)
+    currency = db.Column(db.String, nullable=False, default="USD")
     price = db.Column(db.Float, nullable=False)
     payer = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     bill_id = db.Column(db.Integer, db.ForeignKey("bill.id"), nullable=False)

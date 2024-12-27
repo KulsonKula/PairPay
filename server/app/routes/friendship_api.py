@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 def send_friend_request():
     try:
         current_user = get_jwt_identity()
-        friend_email = request.json.get("friend_email")
+        friend_email = request.json.get("mail")
 
         if not friend_email:
             return (

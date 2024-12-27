@@ -30,6 +30,17 @@ def get_current_user():
         return jsonify({"message": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
+@user_bp.route("/api/user/get_users_emails", methods=["GET"])
+@jwt_required()
+def get_users_emails():
+    try:
+        user = User.query.all()
+        emails = [user.mail for user in user]
+        return jsonify(emails), HTTPStatus.OK
+    except Exception as e:
+        return jsonify({"message": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
 @user_bp.route("/api/user/del_user", methods=["DELETE"])
 @jwt_required()
 @make_log_wrapper

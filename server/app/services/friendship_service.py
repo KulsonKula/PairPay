@@ -116,55 +116,43 @@ class FriendshipService:
 
     def get_friends(self):
         try:
-            friends_query = (
+            friends = (
                 db.session.query(User)
                 .join(
                     Friendship,
-                    (
-                        (Friendship.friend_id == User.id)
-                        & (Friendship.user_id == self.current_user)
-                    )
-                    | (
-                        (Friendship.user_id == User.id)
-                        & (Friendship.friend_id == self.current_user)
+                    db.or_(
+                        db.and_(
+                            Friendship.friend_id == User.id,
+                            Friendship.user_id == self.current_user,
+                            Friendship.status == InvitationStatus.ACCEPTED,
+                        ),
+                        db.and_(
+                            Friendship.user_id == User.id,
+                            Friendship.friend_id == self.current_user,
+                            Friendship.status == InvitationStatus.ACCEPTED,
+                        ),
                     ),
                 )
-                .filter(Friendship.status == InvitationStatus.ACCEPTED)
                 .all()
             )
 
-            # Debugowanie
-            print("Friends query result:", friends_query)
             friend_list = []
-            for friend in friends_query:
-                try:
-                    print(f"Friend object: {friend}, ID: {friend.id}")
-                    debt_info = self.debt_service.get_debt_with_friend(friend.id)
-                    print(f"Debt info: {debt_info}")
+            debt_service = DebtService(self.current_user)
 
-                    friend_data = {
-                        "id": friend.id,
-                        "mail": friend.mail,
-                        "debt_info": debt_info,
-                    }
-                    friend_list.append(friend_data)
-                except Exception as e:
-                    print(
-                        f"Error processing friend {friend.id if hasattr(friend, 'id') else friend}: {e}"
-                    )
-                    raise e
+            for friend in friends:
+                debt_info = debt_service.get_debt_with_friend(friend.id)
+                friend_data = {
+                    "id": friend.id,
+                    "mail": friend.mail,
+                    "debt_info": debt_info,
+                }
+                friend_list.append(friend_data)
 
             return {"friends": friend_list}, HTTPStatus.OK
 
         except SQLAlchemyError as e:
             return {
-                "message": "Database error",
-                "details": str(e),
-            }, HTTPStatus.INTERNAL_SERVER_ERROR
-        except Exception as e:
-            return {
-                "message": "Unexpected error occurred",
-                "details": str(e),
+                "message": f"Database error: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def get_pending_requests(self):
