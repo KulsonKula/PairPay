@@ -205,26 +205,19 @@ class ExpenseService:
         if num_participants > 0:
             amount_per_user = round(expense.price / (num_participants + 1), 2)
 
-            expense_participants = [
-                ExpenseParticipant(
+            for user in participants:
+                expense_participant = ExpenseParticipant(
                     expense_id=expense.id, user_id=user, amount_owed=amount_per_user
                 )
-                for user in participants
-            ]
+                db.session.add(expense_participant)
 
-            db.session.bulk_save_objects(expense_participants)
-
-            debts = [
-                Debt(
+                debt = Debt(
                     creditor_id=expense.payer,
                     debtor_id=user,
                     amount=amount_per_user,
                     expense_id=expense.id,
                 )
-                for user in participants
-            ]
-
-            db.session.bulk_save_objects(debts)
+                db.session.add(debt)
 
             db.session.commit()
 

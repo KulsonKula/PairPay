@@ -128,7 +128,6 @@ def update_user_by_admin():
             return jsonify({"error": "Unauthorized action."}), HTTPStatus.UNAUTHORIZED
 
         data = request.get_json()
-        print("Received data:", data) 
         target_user = if_user_exist(data.get("id"))
 
         update_user_fields(target_user, data)
@@ -140,7 +139,7 @@ def update_user_by_admin():
 
     except Exception as e:
         return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
-    
+
 
 @user_bp.route("/api/user/search", methods=["POST"])
 @jwt_required()
@@ -149,10 +148,13 @@ def search_user():
         data = request.get_json()
         email = data.get("mail")
         if not email:
-            return jsonify({"error": "Email is required for search."}), HTTPStatus.BAD_REQUEST
-        user = User.query.filter_by(mail=email).first() 
+            return (
+                jsonify({"error": "Email is required for search."}),
+                HTTPStatus.BAD_REQUEST,
+            )
+        user = User.query.filter_by(mail=email).first()
         if user:
-            return jsonify(user.to_dict()), HTTPStatus.OK 
+            return jsonify(user.to_dict()), HTTPStatus.OK
         else:
             return jsonify({"message": "User not found."}), HTTPStatus.NOT_FOUND
 

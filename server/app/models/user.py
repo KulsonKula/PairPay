@@ -38,6 +38,6 @@ class User(db.Model):
             "name": self.name,
             "surname": self.surname,
             "mail": self.mail,
-            "admin": self.admin,
+            # "admin": self.admin,
             "created_at": self.created_at,
         }

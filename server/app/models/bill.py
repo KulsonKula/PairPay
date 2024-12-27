@@ -29,8 +29,8 @@ class Bill(db.Model):
         return {
             "id": self.id,
             "user_creator_id": self.user_creator_id,
-            "users": [user.id for user in self.users],
-            "expenses": [expense.id for expense in self.expenses],
+            "users": [user.to_dict() for user in self.users],
+            "expenses": [expense.to_dict() for expense in self.expenses],
             "name": self.name,
             "label": self.label,
             "status": self.status,

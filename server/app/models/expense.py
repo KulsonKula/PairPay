@@ -1,4 +1,5 @@
 from app import db
+from app.services.user_service import get_user_by_id
 
 
 class ExpenseParticipant(db.Model):
@@ -32,5 +33,12 @@ class Expense(db.Model):
             "name": self.name,
             "currency": self.currency,
             "price": self.price,
-            "participants": [user.id for user in self.participants],
+            "payer": get_user_by_id(self.payer).to_dict(),
+            "participants": [
+                {
+                    "user": participant.user.to_dict() if participant.user else None,
+                    "amount_owed": participant.amount_owed,
+                }
+                for participant in self.participants
+            ],
         }
