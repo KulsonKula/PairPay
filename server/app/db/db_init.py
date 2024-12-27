@@ -76,6 +76,13 @@ def init_db():
             generate_password_hash("secure123"),
             True,
         )
+        user7 = create_user(
+            "Jack",
+            "Daniels",
+            "jack@gmail.com",
+            generate_password_hash("123secure"),
+            True,
+        )
 
         create_log(user4.id, "User signed up")
         create_log(user5.id, "User signed up")

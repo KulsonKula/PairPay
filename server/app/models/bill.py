@@ -15,7 +15,7 @@ class Bill(db.Model):
     user_creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String, nullable=False)
     label = db.Column(db.String, nullable=True)
-    status = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.Integer, nullable=False, default=1)
     total_sum = db.Column(db.Float, nullable=True, default=0.0)
     created_at = db.Column(db.DateTime, server_default=func.now(), nullable=False)
 

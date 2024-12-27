@@ -30,6 +30,21 @@ def get_current_user():
         return jsonify({"message": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
+@user_bp.route("/api/user/get_user_by_email/<string:email>", methods=["GET"])
+@jwt_required()
+def get_user_by_email(email):
+    try:
+        user = User.query.filter_by(mail=email).first()
+
+        if user:
+            return jsonify(user.to_dict()), HTTPStatus.OK
+        else:
+            return jsonify({"message": "User not found"}), HTTPStatus.NOT_FOUND
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
 @user_bp.route("/api/user/get_users_emails", methods=["GET"])
 @jwt_required()
 def get_users_emails():
