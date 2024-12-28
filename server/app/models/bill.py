@@ -1,6 +1,8 @@
 from app import db
 from sqlalchemy.sql import func
 
+from app.services.user_service import get_user_by_id
+
 bill_user = db.Table(
     "bill_user",
     db.Column(
@@ -38,7 +40,7 @@ class Bill(db.Model):
         "User",
         secondary="bill_user",
         back_populates="bills",
-        cascade="save-update",  # Modified cascade settings
+        cascade="save-update",
     )
     expenses = db.relationship(
         "Expense",
@@ -49,7 +51,7 @@ class Bill(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "user_creator_id": self.user_creator_id,
+            "user_creator": get_user_by_id(self.user_creator_id).to_dict(),
             "users": [user.to_dict() for user in self.users],
             "expenses": [expense.to_dict() for expense in self.expenses],
             "name": self.name,
