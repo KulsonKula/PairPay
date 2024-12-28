@@ -129,7 +129,7 @@ def delete_specific_bill(bill_id):
         )
 
 
-@bill_bp.route("/bills/<int:bill_id>/invite", methods=["POST"])
+@bill_bp.route("/bills/<int:bill_id>/invite-user", methods=["POST"])
 @jwt_required()
 @make_log_wrapper
 def invite_to_bill(bill_id):
@@ -137,15 +137,48 @@ def invite_to_bill(bill_id):
         current_user = get_jwt_identity()
         invite_data = request.get_json()
 
-        if not invite_data or "invitee_id" not in invite_data:
+        if not invite_data or "user_email" not in invite_data:
             return (
-                jsonify({"message": "Invitee ID is required"}),
+                jsonify({"message": "User Email is required"}),
                 HTTPStatus.BAD_REQUEST,
             )
 
-        invitee_id = invite_data.get("invitee_id")
+        user_email = invite_data.get("user_email")
         bill_service = BillSerivce(current_user)
-        response, status_code = bill_service.invite_to_bill(bill_id, invitee_id)
+        response, status_code = bill_service.invite_user_to_bill(bill_id, user_email)
+        return jsonify(response), status_code
+    except Exception as e:
+        return (
+            jsonify({"message": "Unexpected error occurred", "details": str(e)}),
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
+
+
+@bill_bp.route("/bills/<int:bill_id>/invite-users", methods=["POST"])
+@jwt_required()
+@make_log_wrapper
+def invite_users_to_bill(bill_id):
+    try:
+        current_user = get_jwt_identity()
+
+        invite_data = request.get_json()
+
+        if not invite_data or "user_emails" not in invite_data:
+            return (
+                jsonify({"message": "User Emails are required"}),
+                HTTPStatus.BAD_REQUEST,
+            )
+
+        user_emails = invite_data["user_emails"]
+
+        if not isinstance(user_emails, list) or not user_emails:
+            return (
+                jsonify({"message": "A list of user emails is required"}),
+                HTTPStatus.BAD_REQUEST,
+            )
+
+        bill_service = BillSerivce(current_user)
+        response, status_code = bill_service.invite_users_to_bill(bill_id, user_emails)
         return jsonify(response), status_code
     except Exception as e:
         return (

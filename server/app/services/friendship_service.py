@@ -143,6 +143,8 @@ class FriendshipService:
                 debt_info = debt_service.get_debt_with_friend(friend.id)
                 friend_data = {
                     "id": friend.id,
+                    "name": friend.name,
+                    "surname": friend.surname,
                     "mail": friend.mail,
                     "debt_info": debt_info,
                 }

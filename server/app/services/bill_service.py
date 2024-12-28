@@ -183,11 +183,11 @@ class BillSerivce:
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def invite_to_bill(self, bill_id, invitee_id):
+    def invite_user_to_bill(self, bill_id, user_email):
         try:
-            if not invitee_id:
+            if not user_email:
                 return (
-                    {"message": "Invitee ID is required"},
+                    {"message": "User Email is required"},
                     HTTPStatus.BAD_REQUEST,
                 )
 
@@ -200,14 +200,16 @@ class BillSerivce:
                     {"message": "Only creator of the bill can invite users"},
                     HTTPStatus.FORBIDDEN,
                 )
-            if any(user.id == invitee_id for user in bill.users):
+            if any(user.mail == user_email for user in bill.users):
                 return (
                     {"message": "User is already part of the bill"},
                     HTTPStatus.BAD_REQUEST,
                 )
 
+            invitee = User.query.filter_by(mail=user_email).first()
+
             invitation = Invitation(
-                inviter_id=self.current_user, invitee_id=invitee_id, bill_id=bill_id
+                inviter_id=self.current_user, invitee_id=invitee.id, bill_id=bill_id
             )
             db.session.add(invitation)
             db.session.commit()
@@ -215,10 +217,73 @@ class BillSerivce:
             return (
                 {
                     "message": "Invitation sent successfully",
-                    "invitation_id": invitation.id,
                 },
                 HTTPStatus.CREATED,
             )
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def invite_users_to_bill(self, bill_id, user_emails):
+        try:
+            if not user_emails or not isinstance(user_emails, list):
+                return (
+                    {"message": "A list of user emails is required"},
+                    HTTPStatus.BAD_REQUEST,
+                )
+
+            bill = Bill.query.filter_by(
+                id=bill_id, user_creator_id=self.current_user
+            ).first()
+
+            if not bill:
+                return (
+                    {"message": "Only the creator of the bill can invite users"},
+                    HTTPStatus.FORBIDDEN,
+                )
+
+            results = []
+
+            for user_email in user_emails:
+                if any(user.mail == user_email for user in bill.users):
+                    results.append(
+                        {
+                            "email": user_email,
+                            "message": "User is already part of the bill",
+                        }
+                    )
+                    continue
+
+                invitee = User.query.filter_by(mail=user_email).first()
+
+                if not invitee:
+                    results.append({"email": user_email, "message": "User not found"})
+                    continue
+
+                invitation = Invitation(
+                    inviter_id=self.current_user, invitee_id=invitee.id, bill_id=bill_id
+                )
+                db.session.add(invitation)
+                results.append(
+                    {
+                        "email": user_email,
+                        "message": "Invitation sent successfully",
+                    }
+                )
+
+            db.session.commit()
+
+            return {
+                "message": "Invitations processed",
+                "results": results,
+            }, HTTPStatus.CREATED
+
         except SQLAlchemyError as e:
             db.session.rollback()
             return {
