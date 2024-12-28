@@ -3,7 +3,7 @@ from app import db
 from app.models import (
     Group,
     User,
-    Split,
+    # Split,
     Log,
     Expense,
     Bill,
@@ -32,7 +32,7 @@ def init_db():
 
         db.session.query(Log).delete()
         db.session.query(Invitation).delete()
-        db.session.query(Split).delete()
+        # db.session.query(Split).delete()
         db.session.query(Debt).delete()
         db.session.query(ExpenseParticipant).delete()
         db.session.query(Expense).delete()
@@ -96,7 +96,13 @@ def init_db():
         add_user_to_group(group2, user2)
         add_user_to_group(group2, user3)
 
-        bill1 = create_bill(user1.id, [user2.id, user3.id], "Dinner Bill", "Food", 1)
+        bill1 = create_bill(
+            user1.id,
+            [user2.id, user3.id, user4.id, user5.id, user6.id],
+            "Dinner Bill",
+            "Food",
+            1,
+        )
         bill2 = create_bill(user2.id, [user1.id], "Taxi Bill", "Transport", 2)
 
         bills = [
@@ -139,9 +145,33 @@ def init_db():
             bill_id=bill1.id,
             participants_data=participants,
         )
+        expense2 = create_expense(
+            name="Dinner2",
+            currency="USD",
+            price=50.0,
+            payer_id=user1.id,
+            bill_id=bill1.id,
+            participants_data=participants,
+        )
+        expense3 = create_expense(
+            name="Dinner3",
+            currency="USD",
+            price=50.0,
+            payer_id=user1.id,
+            bill_id=bill1.id,
+            participants_data=participants,
+        )
+        expense4 = create_expense(
+            name="Dinner4",
+            currency="USD",
+            price=50.0,
+            payer_id=user1.id,
+            bill_id=bill1.id,
+            participants_data=participants,
+        )
 
-        create_split(expense1.id, user1.id, 30)
-        create_split(expense1.id, user2.id, 40)
+        # create_split(expense1.id, user1.id, 30)
+        # create_split(expense1.id, user2.id, 40)
 
     except SQLAlchemyError as e:
         db.session.rollback()
@@ -215,13 +245,13 @@ def create_expense(name, currency, price, payer_id, bill_id, participants_data):
     return expense
 
 
-def create_split(expense_id, user_id, split_amount):
-    split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
-    split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
-    db.session.add(split)
-    db.session.commit()
-    logger.info(f"Split created: {expense_id}, Price: {split_amount}")
-    return split
+# def create_split(expense_id, user_id, split_amount):
+#     split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
+#     split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
+#     db.session.add(split)
+#     db.session.commit()
+#     logger.info(f"Split created: {expense_id}, Price: {split_amount}")
+#     return split
 
 
 def create_bill(user_creator_id, user_added_ids, name, label, status):

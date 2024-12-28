@@ -4,9 +4,12 @@ from app.services.user_service import get_user_by_id
 
 class ExpenseParticipant(db.Model):
     __tablename__ = "expense_participant"
+    __mapper_args__ = {"confirm_deleted_rows": False}
 
     id = db.Column(db.Integer, primary_key=True)
-    expense_id = db.Column(db.Integer, db.ForeignKey("expense.id"), nullable=False)
+    expense_id = db.Column(
+        db.Integer, db.ForeignKey("expense.id", ondelete="CASCADE"), nullable=False
+    )
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     amount_owed = db.Column(db.Float, nullable=False)
 
@@ -16,16 +19,28 @@ class ExpenseParticipant(db.Model):
 
 class Expense(db.Model):
     __tablename__ = "expense"
+    __mapper_args__ = {"confirm_deleted_rows": False}
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     name = db.Column(db.String, nullable=False)
     currency = db.Column(db.String, nullable=False, default="USD")
     price = db.Column(db.Float, nullable=False)
     payer = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    bill_id = db.Column(db.Integer, db.ForeignKey("bill.id"), nullable=False)
+    bill_id = db.Column(
+        db.Integer, db.ForeignKey("bill.id", ondelete="CASCADE"), nullable=False
+    )
 
     bill = db.relationship("Bill", back_populates="expenses")
-    participants = db.relationship("ExpenseParticipant", back_populates="expense")
+    participants = db.relationship(
+        "ExpenseParticipant",
+        back_populates="expense",
+        cascade="all, delete-orphan",
+    )
+    debts = db.relationship(
+        "Debt",
+        cascade="all, delete-orphan",
+        back_populates="expense",
+    )
 
     def to_dict(self):
         return {

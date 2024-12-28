@@ -141,28 +141,44 @@ class BillSerivce:
 
     def delete_bill(self, bill_id):
         try:
-            bill = Bill.query.filter_by(
-                id=bill_id, user_creator_id=self.current_user
-            ).first()
+            bill = (
+                Bill.query.options(db.joinedload(Bill.expenses))
+                .filter_by(id=bill_id, user_creator_id=self.current_user)
+                .first()
+            )
 
             if not bill:
-                return (
-                    {"message": "Bill not found"},
-                    HTTPStatus.NOT_FOUND,
+                return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
+
+            try:
+                db.session.begin_nested()
+
+                db.session.execute(
+                    bill_user.delete().where(bill_user.c.bill_id == bill_id)
                 )
 
-            db.session.delete(bill)
-            db.session.commit()
-            return (
-                {"message": f"Bill {bill.id} deleted successfully"},
-                HTTPStatus.OK,
-            )
+                for expense in bill.expenses[:]:
+                    db.session.delete(expense)
+
+                db.session.delete(bill)
+
+                db.session.commit()
+
+                return {
+                    "message": f"Bill {bill_id} and its associations deleted successfully"
+                }, HTTPStatus.OK
+
+            except Exception as nested_error:
+                db.session.rollback()
+                raise nested_error
+
         except SQLAlchemyError as e:
             db.session.rollback()
             return {
                 "message": f"Database error: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
+            db.session.rollback()
             return {
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR

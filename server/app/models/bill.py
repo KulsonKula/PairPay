@@ -3,8 +3,18 @@ from sqlalchemy.sql import func
 
 bill_user = db.Table(
     "bill_user",
-    db.Column("bill_id", db.Integer, db.ForeignKey("bill.id"), primary_key=True),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
+    db.Column(
+        "bill_id",
+        db.Integer,
+        db.ForeignKey("bill.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    db.Column(
+        "user_id",
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
 
 
@@ -20,10 +30,21 @@ class Bill(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now(), nullable=False)
 
     user_creator = db.relationship(
-        "User", foreign_keys=[user_creator_id], back_populates="bills_created"
+        "User",
+        foreign_keys=[user_creator_id],
+        back_populates="bills_created",
     )
-    users = db.relationship("User", secondary=bill_user, back_populates="bills")
-    expenses = db.relationship("Expense", back_populates="bill")
+    users = db.relationship(
+        "User",
+        secondary="bill_user",
+        back_populates="bills",
+        cascade="save-update",  # Modified cascade settings
+    )
+    expenses = db.relationship(
+        "Expense",
+        back_populates="bill",
+        cascade="all, delete-orphan",
+    )
 
     def to_dict(self):
         return {
