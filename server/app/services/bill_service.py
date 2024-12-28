@@ -356,6 +356,35 @@ class BillSerivce:
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def get_user_inviations(self):
+        try:
+            invitations = (
+                Invitation.query.filter_by(invitee_id=self.current_user)
+                .join(Bill)
+                .add_columns(Bill.name, Bill.label, Invitation.status)
+                .all()
+            )
+
+            invitations_data = [
+                {
+                    "bill_name": invitation.name,
+                    "bill_label": invitation.label,
+                    "invitation_id": invitation.Invitation.id,
+                }
+                for invitation in invitations
+            ]
+
+            return {"invitations": invitations_data}, HTTPStatus.OK
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
     def _update_bill_fields(self, bill, bill_data):
         updatable_fields = ["name", "label", "status", "total_sum"]
         for field in updatable_fields:

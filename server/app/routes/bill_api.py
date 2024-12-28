@@ -215,3 +215,21 @@ def decline_invitation(invitation_id):
             jsonify({"message": "Unexpected error occurred", "details": str(e)}),
             HTTPStatus.INTERNAL_SERVER_ERROR,
         )
+
+
+@bill_bp.route("/invitations", methods=["GET"])
+@jwt_required()
+def get_user_invitations():
+    try:
+        current_user = get_jwt_identity()
+        logger.info(f"Fetching invitations for user: {current_user}")
+
+        bill_service = BillSerivce(current_user)
+        response, status_code = bill_service.get_user_inviations()
+
+        return jsonify(response), status_code
+    except Exception as e:
+        return (
+            jsonify({"message": "Unexpected error occurred", "details": str(e)}),
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
