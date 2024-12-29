@@ -361,7 +361,9 @@ class BillSerivce:
             invitations = (
                 Invitation.query.filter_by(invitee_id=self.current_user)
                 .join(Bill)
-                .add_columns(Bill.name, Bill.label, Invitation.status)
+                .add_columns(
+                    Bill.name, Bill.label, Invitation.status, Invitation.inviter_id
+                )
                 .all()
             )
 
@@ -369,6 +371,7 @@ class BillSerivce:
                 {
                     "bill_name": invitation.name,
                     "bill_label": invitation.label,
+                    "email": User.query.get(invitation.inviter_id).mail,
                     "invitation_id": invitation.Invitation.id,
                 }
                 for invitation in invitations
