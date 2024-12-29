@@ -266,6 +266,38 @@ class BillSerivce:
                     results.append({"email": user_email, "message": "User not found"})
                     continue
 
+                existing_invitation = Invitation.query.filter(
+                    (Invitation.inviter_id == self.current_user)
+                    & (Invitation.invitee_id == invitee.id)
+                    & (Invitation.bill_id == bill_id)
+                ).first()
+
+                if existing_invitation:
+                    if existing_invitation.status == InvitationStatus.PENDING:
+                        results.append(
+                            {
+                                "email": user_email,
+                                "message": "Invitation already pending",
+                            }
+                        )
+                    elif existing_invitation.status == InvitationStatus.ACCEPTED:
+                        results.append(
+                            {
+                                "email": user_email,
+                                "message": "User has already accepted the invitation",
+                            }
+                        )
+                    elif existing_invitation.status == InvitationStatus.DECLINED:
+                        existing_invitation.status = InvitationStatus.PENDING
+                        db.session.commit()
+                        results.append(
+                            {
+                                "email": user_email,
+                                "message": "Invitation resent successfully",
+                            }
+                        )
+                    continue
+
                 invitation = Invitation(
                     inviter_id=self.current_user, invitee_id=invitee.id, bill_id=bill_id
                 )
@@ -359,7 +391,9 @@ class BillSerivce:
     def get_user_inviations(self):
         try:
             invitations = (
-                Invitation.query.filter_by(invitee_id=self.current_user)
+                Invitation.query.filter_by(
+                    invitee_id=self.current_user, status=InvitationStatus.PENDING
+                )
                 .join(Bill)
                 .add_columns(
                     Bill.name, Bill.label, Invitation.status, Invitation.inviter_id
