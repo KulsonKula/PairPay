@@ -203,7 +203,7 @@ class ExpenseService:
     def _create_expense_participants(self, expense, participants):
         num_participants = len(participants)
         if num_participants > 0:
-            amount_per_user = round(expense.price / (num_participants + 1), 2)
+            amount_per_user = round(expense.price / (num_participants), 2)
 
             for user in participants:
                 expense_participant = ExpenseParticipant(
