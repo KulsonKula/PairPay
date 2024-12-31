@@ -1,15 +1,17 @@
-from logging import Logger
+from logging import getLogger
 from app import db
-from app.models import Expense, Bill, User
+from app.models import Expense, Bill, ExpenseParticipant, Debt
 from sqlalchemy.exc import SQLAlchemyError
 from http import HTTPStatus
+from app.services.bill_service import BillSerivce
 
-logger = Logger(__name__)
+logger = getLogger(__name__)
 
 
 class ExpenseService:
     def __init__(self, current_user):
         self.current_user = current_user
+        self.bill_service = BillSerivce(current_user)
 
     def get_expenses(self, bill_id):
         try:
@@ -17,10 +19,7 @@ class ExpenseService:
             if not bill:
                 return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
 
-            if (
-                self.current_user not in [user.id for user in bill.users]
-                and self.current_user != bill.user_creator_id
-            ):
+            if not self._is_user_participant(bill):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
@@ -44,10 +43,7 @@ class ExpenseService:
             if not bill:
                 return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
 
-            if (
-                self.current_user not in [user.id for user in bill.users]
-                and self.current_user != bill.user_creator_id
-            ):
+            if not self._is_user_participant(bill):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
@@ -57,7 +53,6 @@ class ExpenseService:
                 return {"message": "Expense not found"}, HTTPStatus.NOT_FOUND
 
             return {"expense": expense.to_dict()}, HTTPStatus.OK
-
         except SQLAlchemyError as e:
             return {
                 "message": f"Database error: {str(e)}"
@@ -73,36 +68,42 @@ class ExpenseService:
             if not bill:
                 return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
 
-            logger.info(
-                f"Current user: {self.current_user}, Bill creator: {bill.user_creator_id}, "
-                f"Participants: {[user.id for user in bill.users]}"
-            )
-
-            if (
-                self.current_user not in [user.id for user in bill.users]
-                and self.current_user != bill.user_creator_id
-            ):
+            if not self._is_user_participant(bill):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
 
+            required_fields = ["name", "currency", "price", "payer"]
+            for field in required_fields:
+                if field not in expense_data:
+                    return {
+                        "message": f"Missing required field: {field}"
+                    }, HTTPStatus.BAD_REQUEST
+
             expense = Expense(
-                name=expense_data.get("name"),
-                currency=expense_data.get("currency"),
-                price=expense_data.get("price"),
-                payer=expense_data.get("payer"),
+                name=expense_data["name"],
+                currency=expense_data["currency"],
+                price=expense_data["price"],
+                payer=expense_data["payer"],
                 bill_id=bill_id,
             )
 
-            users = expense_data.get("users", [])
-            if users:
-                valid_users = [user.id for user in bill.users] + [bill.user_creator_id]
-                valid_users = User.query.filter(User.id.in_(valid_users)).all()
-                for user in valid_users:
-                    if user.id in users:
-                        expense.users.append(user)
+            participants = expense_data.get("participants", [])
+            valid_participants = [user.id for user in bill.users] + [
+                bill.user_creator_id
+            ]
+
+            if not set(participants).issubset(valid_participants):
+                return {
+                    "message": "Invalid participants specified"
+                }, HTTPStatus.BAD_REQUEST
 
             db.session.add(expense)
+            db.session.flush()
+
+            self._create_expense_participants(expense, participants)
+
+            bill.total_sum += expense.price
             db.session.commit()
 
             logger.info(
@@ -110,12 +111,15 @@ class ExpenseService:
             )
 
             return {"expense": expense.to_dict()}, HTTPStatus.CREATED
+
         except SQLAlchemyError as e:
             db.session.rollback()
+            logger.error(f"Database error during expense creation: {str(e)}")
             return {
                 "message": f"Database error: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
+            logger.error(f"Unexpected error during expense creation: {str(e)}")
             return {
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -127,38 +131,37 @@ class ExpenseService:
                 return {"message": "Expense not found"}, HTTPStatus.NOT_FOUND
 
             bill = expense.bill
-            if (
-                self.current_user not in [user.id for user in bill.users]
-                and self.current_user != bill.user_creator_id
-            ):
+            if not self._is_user_participant(bill):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
 
-            users = expense_data.get("users", [])
-            if users:
-                valid_users = [user.id for user in bill.users] + [bill.user_creator_id]
-                valid_users = User.query.filter(User.id.in_(valid_users)).all()
-
-                expense.users = [
-                    user for user in expense.users if user.id in valid_users
-                ]
-                for user in valid_users:
-                    if user.id in users and user not in expense.users:
-                        expense.users.append(user)
-
+            participants = expense_data.get("participants", [])
+            valid_participants = [user.id for user in bill.users] + [
+                bill.user_creator_id
+            ]
+            if participants and not set(participants).issubset(valid_participants):
+                return {
+                    "message": "Invalid participants specified"
+                }, HTTPStatus.BAD_REQUEST
             self._update_expense_fields(expense, expense_data)
+
+            if "participants" in expense_data:
+                self._create_expense_participants(expense, participants)
+
             db.session.commit()
 
             logger.info(f"Expense {expense_id} modified by user {self.current_user}")
-
             return {"expense": expense.to_dict()}, HTTPStatus.OK
+
         except SQLAlchemyError as e:
             db.session.rollback()
+            logger.error(f"Database error during expense modification: {str(e)}")
             return {
                 "message": f"Database error: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:
+            logger.error(f"Unexpected error during expense modification: {str(e)}")
             return {
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -170,10 +173,7 @@ class ExpenseService:
                 return {"message": "Expense not found"}, HTTPStatus.NOT_FOUND
 
             bill = expense.bill
-            if (
-                self.current_user not in [user.id for user in bill.users]
-                and self.current_user != bill.user_creator_id
-            ):
+            if not self._is_user_participant(bill):
                 return {
                     "message": "User is not a participant of the bill"
                 }, HTTPStatus.FORBIDDEN
@@ -182,7 +182,6 @@ class ExpenseService:
             db.session.commit()
 
             logger.info(f"Expense {expense_id} deleted by user {self.current_user}")
-
             return {"message": "Expense deleted successfully"}, HTTPStatus.OK
         except SQLAlchemyError as e:
             db.session.rollback()
@@ -195,7 +194,35 @@ class ExpenseService:
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def _update_expense_fields(self, expense, expense_data):
-        updatable_fields = ["name", "currency", "price", "payer", "users"]
+        updatable_fields = ["name", "currency", "price", "payer", "participants"]
+        updatable_fields = ["name", "currency", "price", "payer", "participants"]
         for field in updatable_fields:
             if field in expense_data:
                 setattr(expense, field, expense_data[field])
+
+    def _create_expense_participants(self, expense, participants):
+        num_participants = len(participants)
+        if num_participants > 0:
+            amount_per_user = round(expense.price / (num_participants), 2)
+
+            for user in participants:
+                expense_participant = ExpenseParticipant(
+                    expense_id=expense.id, user_id=user, amount_owed=amount_per_user
+                )
+                db.session.add(expense_participant)
+
+                debt = Debt(
+                    creditor_id=expense.payer,
+                    debtor_id=user,
+                    amount=amount_per_user,
+                    expense_id=expense.id,
+                )
+                db.session.add(debt)
+
+            db.session.commit()
+
+    def _is_user_participant(self, bill):
+        return (
+            self.current_user in [user.id for user in bill.users]
+            or self.current_user == bill.user_creator_id
+        )

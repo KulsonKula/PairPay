@@ -3,15 +3,25 @@ from http import HTTPStatus
 from app.models import Friendship
 from app import db
 from app.models import InvitationStatus
+from app.models.user import User
+from app.services.debt_service import DebtService
 
 
 class FriendshipService:
     def __init__(self, current_user):
         self.current_user = current_user
+        self.debt_service = DebtService(current_user)
 
-    def send_request(self, friend_id):
+    def send_request(self, friend_email):
         try:
-            if self.current_user == friend_id:
+            friend = User.query.filter_by(mail=friend_email).first()
+
+            if not friend:
+                return {
+                    "message": "No user found with the given email"
+                }, HTTPStatus.NOT_FOUND
+
+            if self.current_user == friend.id:
                 return {
                     "message": "Error sending request to yourself"
                 }, HTTPStatus.BAD_REQUEST
@@ -19,18 +29,35 @@ class FriendshipService:
             friendship = Friendship.query.filter(
                 (
                     (Friendship.user_id == self.current_user)
-                    & (Friendship.friend_id == friend_id)
+                    & (Friendship.friend_id == friend.id)
                 )
                 | (
-                    (Friendship.user_id == friend_id)
+                    (Friendship.user_id == friend.id)
                     & (Friendship.friend_id == self.current_user)
                 )
             ).first()
 
             if friendship:
-                return {"message": "Request already exists"}, HTTPStatus.BAD_REQUEST
+                if friendship.status == InvitationStatus.PENDING:
+                    return {
+                        "message": "Friend request already pending"
+                    }, HTTPStatus.BAD_REQUEST
+                elif friendship.status == InvitationStatus.ACCEPTED:
+                    return {
+                        "message": "You are already friends"
+                    }, HTTPStatus.BAD_REQUEST
+                elif friendship.status == InvitationStatus.DECLINED:
+                    friendship.status = InvitationStatus.PENDING
+                    db.session.commit()
+                    return {
+                        "message": "Friend request resent successfully"
+                    }, HTTPStatus.OK
 
-            new_friendship = Friendship(user_id=self.current_user, friend_id=friend_id)
+            new_friendship = Friendship(
+                user_id=self.current_user,
+                friend_id=friend.id,
+                status=InvitationStatus.PENDING,
+            )
             db.session.add(new_friendship)
             db.session.commit()
             return {"message": "Friend request sent successfully"}, HTTPStatus.CREATED
@@ -89,45 +116,51 @@ class FriendshipService:
 
     def get_friends(self):
         try:
-            friends_query = Friendship.query.filter(
-                (Friendship.user_id == self.current_user)
-                | (Friendship.friend_id == self.current_user),
-                Friendship.status == InvitationStatus.ACCEPTED,
-            ).all()
+            friends = (
+                db.session.query(User)
+                .join(
+                    Friendship,
+                    db.or_(
+                        db.and_(
+                            Friendship.friend_id == User.id,
+                            Friendship.user_id == self.current_user,
+                            Friendship.status == InvitationStatus.ACCEPTED,
+                        ),
+                        db.and_(
+                            Friendship.user_id == User.id,
+                            Friendship.friend_id == self.current_user,
+                            Friendship.status == InvitationStatus.ACCEPTED,
+                        ),
+                    ),
+                )
+                .all()
+            )
 
-            friends = [
-                {
-                    "id": (
-                        friendship.friend.id
-                        if friendship.user_id == self.current_user
-                        else friendship.user.id
-                    ),
-                    "mail": (
-                        friendship.friend.mail
-                        if friendship.user_id == self.current_user
-                        else friendship.user.mail
-                    ),
+            friend_list = []
+            debt_service = DebtService(self.current_user)
+
+            for friend in friends:
+                debt_info = debt_service.get_debt_with_friend(friend.id)
+                friend_data = {
+                    "id": friend.id,
+                    "name": friend.name,
+                    "surname": friend.surname,
+                    "mail": friend.mail,
+                    "debt_info": debt_info,
                 }
-                for friendship in friends_query
-            ]
+                friend_list.append(friend_data)
 
-            return {"friends": friends}, HTTPStatus.OK
+            return {"friends": friend_list}, HTTPStatus.OK
 
         except SQLAlchemyError as e:
             return {
-                "message": "Database error",
-                "details": str(e),
-            }, HTTPStatus.INTERNAL_SERVER_ERROR
-        except Exception as e:
-            return {
-                "message": "Unexpected error occurred",
-                "details": str(e),
+                "message": f"Database error: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def get_pending_requests(self):
         try:
             pending_requests = Friendship.query.filter_by(
-                friend_id=self.current_user, status="pending"
+                friend_id=self.current_user, status=InvitationStatus.PENDING
             ).all()
 
             request_list = [

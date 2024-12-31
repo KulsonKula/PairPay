@@ -26,4 +26,4 @@ jobs:
           pip install black[jupyter]
 
       - name: Run Black
-        run: black server/app server/main.py
+        run: black --check server/app server/main.py

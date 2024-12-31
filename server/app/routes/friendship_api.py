@@ -13,13 +13,16 @@ logger = getLogger(__name__)
 def send_friend_request():
     try:
         current_user = get_jwt_identity()
-        friend_id = request.json.get("friend_id")
+        friend_email = request.json.get("mail")
 
-        if not friend_id:
-            return jsonify({"message": "Friend ID is required"}), HTTPStatus.BAD_REQUEST
+        if not friend_email:
+            return (
+                jsonify({"message": "Friend email is required"}),
+                HTTPStatus.BAD_REQUEST,
+            )
 
         friendship_service = FriendshipService(current_user)
-        response, status_code = friendship_service.send_request(friend_id)
+        response, status_code = friendship_service.send_request(friend_email)
         return jsonify(response), status_code
     except Exception as e:
         return (
@@ -81,7 +84,7 @@ def get_friends():
         )
 
 
-@friend_bp.route("pending_requests", methods=["GET"], endpoint="get_pending_requests")
+@friend_bp.route("/pending_requests", methods=["GET"], endpoint="get_pending_requests")
 @jwt_required()
 def get_pending_requests():
     try:

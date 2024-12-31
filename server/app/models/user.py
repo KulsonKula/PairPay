@@ -20,9 +20,7 @@ class User(db.Model):
     )
 
     bills = db.relationship("Bill", secondary="bill_user", back_populates="users")
-    expenses = db.relationship(
-        "Expense", secondary="expense_user", back_populates="users"
-    )
+    expense_participants = db.relationship("ExpenseParticipant", back_populates="user")
 
     groups_led = db.relationship(
         "Group", back_populates="lider", foreign_keys="[Group.user_lider]"
@@ -40,6 +38,6 @@ class User(db.Model):
             "name": self.name,
             "surname": self.surname,
             "mail": self.mail,
-            "admin": self.admin,
+            # "admin": self.admin,
             "created_at": self.created_at,
         }

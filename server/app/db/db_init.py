@@ -3,7 +3,7 @@ from app import db
 from app.models import (
     Group,
     User,
-    Split,
+    # Split,
     Log,
     Expense,
     Bill,
@@ -12,11 +12,13 @@ from app.models import (
     Friendship,
     Invitation,
     InvitationStatus,
-    expense_user,
+    ExpenseParticipant,
+    Debt,
 )
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash
+
 
 logger = getLogger(__name__)
 
@@ -27,11 +29,12 @@ def init_db():
     try:
         db.session.execute(user_group.delete())
         db.session.execute(bill_user.delete())
-        db.session.execute(expense_user.delete())
 
         db.session.query(Log).delete()
         db.session.query(Invitation).delete()
-        db.session.query(Split).delete()
+        # db.session.query(Split).delete()
+        db.session.query(Debt).delete()
+        db.session.query(ExpenseParticipant).delete()
         db.session.query(Expense).delete()
         db.session.query(Bill).delete()
         db.session.query(Group).delete()
@@ -73,16 +76,17 @@ def init_db():
             generate_password_hash("secure123"),
             True,
         )
+        user7 = create_user(
+            "Jack",
+            "Daniels",
+            "jack@gmail.com",
+            generate_password_hash("123secure"),
+            True,
+        )
 
         create_log(user4.id, "User signed up")
         create_log(user5.id, "User signed up")
         create_log(user6.id, "User signed up")
-
-        create_friendship(user1.id, user4.id)
-        create_friendship(user2.id, user5.id)
-        create_friendship(user3.id, user6.id)
-        create_friendship(user4.id, user5.id)
-        create_friendship(user5.id, user6.id)
 
         group1 = create_group(user1.id)
         group2 = create_group(user2.id)
@@ -94,21 +98,80 @@ def init_db():
 
         bill1 = create_bill(
             user1.id,
-            [user2.id, user3.id],
+            [user2.id, user3.id, user4.id, user5.id, user6.id],
             "Dinner Bill",
             "Food",
             1,
-            50.0,
         )
-        bill2 = create_bill(user2.id, [user1.id], "Taxi Bill", "Transport", 2, 30.0)
+        bill2 = create_bill(user2.id, [user1.id], "Taxi Bill", "Transport", 2)
 
-        expense1 = create_expense("Dinner", 1, 50.0, user1.id, bill1.id)
-        expense2 = create_expense("Taxi", 1, 30.0, user2.id, bill2.id)
+        bills = [
+            create_bill(user1.id, [user2.id, user3.id], "Dinner Bill", "Food", 1),
+            create_bill(user1.id, [user4.id], "Electricity Bill", "Utilities", 2),
+            create_bill(
+                user1.id, [user2.id, user3.id, user5.id], "Team Lunch", "Food", 3
+            ),
+            create_bill(user1.id, [user6.id], "Gym Membership", "Health", 4),
+            create_bill(
+                user1.id,
+                [user2.id, user6.id, user4.id],
+                "Weekend Getaway",
+                "Travel",
+                5,
+            ),
+            create_bill(
+                user1.id, [user3.id], "Netflix Subscription", "Entertainment", 6
+            ),
+            create_bill(
+                user1.id, [user4.id, user5.id, user6.id], "Groceries", "Food", 7
+            ),
+            create_bill(user1.id, [user2.id], "Book Purchase", "Education", 2),
+            create_bill(user1.id, [user5.id], "Water Bill", "Utilities", 9),
+            create_bill(
+                user1.id, [user5.id, user3.id], "Concert Tickets", "Entertainment", 10
+            ),
+        ]
 
-        create_split(expense1.id, user1.id, 30)
-        create_split(expense1.id, user2.id, 40)
+        participants = [
+            {"user_id": user2.id, "amount_owed": 20},
+            {"user_id": user3.id, "amount_owed": 30},
+        ]
 
-        logger.info("Database initialization successful.")
+        expense1 = create_expense(
+            name="Dinner",
+            currency="USD",
+            price=50.0,
+            payer_id=user1.id,
+            bill_id=bill1.id,
+            participants_data=participants,
+        )
+        expense2 = create_expense(
+            name="Dinner2",
+            currency="USD",
+            price=50.0,
+            payer_id=user1.id,
+            bill_id=bill1.id,
+            participants_data=participants,
+        )
+        expense3 = create_expense(
+            name="Dinner3",
+            currency="USD",
+            price=50.0,
+            payer_id=user1.id,
+            bill_id=bill1.id,
+            participants_data=participants,
+        )
+        expense4 = create_expense(
+            name="Dinner4",
+            currency="USD",
+            price=50.0,
+            payer_id=user1.id,
+            bill_id=bill1.id,
+            participants_data=participants,
+        )
+
+        # create_split(expense1.id, user1.id, 30)
+        # create_split(expense1.id, user2.id, 40)
 
     except SQLAlchemyError as e:
         db.session.rollback()
@@ -154,32 +217,49 @@ def add_user_to_group(group, user):
         logger.info(f"User {user.id} already in Group {group.id}")
 
 
-def create_expense(name, currency, price, payer, bill_id):
+def create_expense(name, currency, price, payer_id, bill_id, participants_data):
     expense = Expense(
-        name=name, currency=currency, price=price, payer=payer, bill_id=bill_id
+        name=name, currency=currency, price=price, payer=payer_id, bill_id=bill_id
     )
     db.session.add(expense)
+    db.session.flush()
+
+    for participant in participants_data:
+        participant_entry = ExpenseParticipant(
+            expense_id=expense.id,
+            user_id=participant["user_id"],
+            amount_owed=participant["amount_owed"],
+        )
+        db.session.add(participant_entry)
+
+        debt = Debt(
+            creditor_id=payer_id,
+            debtor_id=participant["user_id"],
+            amount=participant["amount_owed"],
+            expense_id=expense.id,
+        )
+        db.session.add(debt)
+
     db.session.commit()
     logger.info(f"Expense created: {name}, Price: {price}")
     return expense
 
 
-def create_split(expense_id, user_id, split_amount):
-    split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
-    split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
-    db.session.add(split)
-    db.session.commit()
-    logger.info(f"Split created: {expense_id}, Price: {split_amount}")
-    return split
+# def create_split(expense_id, user_id, split_amount):
+#     split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
+#     split = Split(expense_id=expense_id, user_id=user_id, split_amount=split_amount)
+#     db.session.add(split)
+#     db.session.commit()
+#     logger.info(f"Split created: {expense_id}, Price: {split_amount}")
+#     return split
 
 
-def create_bill(user_creator_id, user_added_ids, name, label, status, total_sum):
+def create_bill(user_creator_id, user_added_ids, name, label, status):
     bill = Bill(
         user_creator_id=user_creator_id,
         name=name,
         label=label,
         status=status,
-        total_sum=total_sum,
     )
     db.session.add(bill)
     db.session.commit()
@@ -189,24 +269,36 @@ def create_bill(user_creator_id, user_added_ids, name, label, status, total_sum)
         if user:
             bill.users.append(user)
 
-    db.session.commit()
-    logger.info(
-        f"Bill created: {name}, Total Sum: {total_sum}, Users: {
+            if user_id != user_creator_id:
+                existing_friendship = Friendship.query.filter(
+                    (Friendship.user_id == user_creator_id)
+                    & (Friendship.friend_id == user_id)
+                ).first()
 
-            user_added_ids}"
-    )
+                if not existing_friendship:
+                    create_friendship(user_creator_id, user_id)
+            for other_user_id in user_added_ids:
+                if user_id != other_user_id:
+                    existing_friendship = Friendship.query.filter(
+                        (Friendship.user_id == user_id)
+                        & (Friendship.friend_id == other_user_id)
+                    ).first()
+
+                    if not existing_friendship:
+                        create_friendship(user_id, other_user_id)
+
+    db.session.commit()
+    logger.info(f"Bill created: {name}, Users: {user_added_ids}")
     return bill
 
 
 def create_friendship(user_id_1, user_id_2):
-    """Creates a friendship between two users."""
     friendship = Friendship(
         user_id=user_id_1, friend_id=user_id_2, status=InvitationStatus.ACCEPTED
     )
     db.session.add(friendship)
     db.session.commit()
     logger.info(
-        f"Friendship {friendship.id} created between user {
-            user_id_1} and user {user_id_2}"
+        f"Friendship {friendship.id} created between user {user_id_1} and user {user_id_2}"
     )
     return friendship
