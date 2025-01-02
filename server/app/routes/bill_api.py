@@ -271,3 +271,22 @@ def get_bill_users(bill_id):
             jsonify({"message": "Unexpected error occurred", "details": str(e)}),
             HTTPStatus.INTERNAL_SERVER_ERROR,
         )
+
+
+@bill_bp.route("/bills/<int:bill_id>/participant/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+def delete_participant_from_bill(bill_id, user_id):
+    try:
+        current_user = get_jwt_identity()
+
+        bill_service = BillSerivce(current_user)
+        response, status_code = bill_service.delete_participant_from_bill(
+            bill_id, user_id
+        )
+
+        return jsonify(response), status_code
+    except Exception as e:
+        return (
+            jsonify({"message": "Unexpected error occurred", "details": str(e)}),
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+        )

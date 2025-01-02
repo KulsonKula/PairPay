@@ -185,6 +185,48 @@ class BillSerivce:
                 "message": f"An unexpected error occurred: {str(e)}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def delete_participant_from_bill(self, bill_id, user_id):
+        try:
+            bill = Bill.query.filter_by(
+                id=bill_id, user_creator_id=self.current_user
+            ).first()
+
+            if not bill:
+                return (
+                    {
+                        "message": "Bill not found or you are not authorized to modify it"
+                    },
+                    HTTPStatus.NOT_FOUND,
+                )
+
+            if user_id == self.current_user:
+                return (
+                    {"message": "You cannot remove yourself from the bill"},
+                    HTTPStatus.BAD_REQUEST,
+                )
+
+            user = User.query.get(user_id)
+
+            if not user:
+                return {"message": "User not found"}, HTTPStatus.NOT_FOUND
+
+            bill.users.remove(user)
+            db.session.commit()
+
+            return (
+                {"message": f"User {user_id} removed from bill {bill_id}"},
+                HTTPStatus.OK,
+            )
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {
+                "message": f"Database error: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:
+            return {
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
     def invite_user_to_bill(self, bill_id, user_email):
         try:
             if not user_email:
