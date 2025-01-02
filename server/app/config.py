@@ -11,7 +11,7 @@ class Config:
         self.env = env
         self.SECRET_KEY = os.getenv("SECRET_KEY")
         self.CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
-        self.CORS_ORIGINS = ["http://localhost:5173"]
+        self.CORS_ORIGINS = ["http://localhost:5173", "http://localhost:4173"]
         self.CORS_METHODS = ["GET", "POST", "PUT", "DELETE"]
         self.MAX_CONTENT_LENGTH = 50 * 1024 * 1024
         self.SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
@@ -27,6 +27,10 @@ class Config:
         self.MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
         self.MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
         self.MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
+
+        self.COMPRESS_ALGORITHM = "gzip"
+        self.COMPRESS_LEVEL = 6
+        self.COMPRESS_MIN_SIZE = 500
 
         self.configure_for_env()
 

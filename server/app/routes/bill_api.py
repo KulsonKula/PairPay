@@ -233,3 +233,41 @@ def get_user_invitations():
             jsonify({"message": "Unexpected error occurred", "details": str(e)}),
             HTTPStatus.INTERNAL_SERVER_ERROR,
         )
+
+
+@bill_bp.route("/bills/<int:bill_id>/available-friends", methods=["GET"])
+@jwt_required()
+def get_friends_not_in_bill(bill_id):
+    try:
+        current_user = get_jwt_identity()
+        logger.info(
+            f"Fetching available friends for bill {bill_id} and user {current_user}"
+        )
+
+        bill_service = BillSerivce(current_user)
+        response, status_code = bill_service.get_friends_not_in_bill(bill_id)
+
+        return jsonify(response), status_code
+    except Exception as e:
+        return (
+            jsonify({"message": "Unexpected error occurred", "details": str(e)}),
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
+
+
+@bill_bp.route("/bills/<int:bill_id>/participants", methods=["GET"])
+@jwt_required()
+def get_bill_users(bill_id):
+    try:
+        current_user = get_jwt_identity()
+        logger.info(f"Fetching users for bill {bill_id}")
+
+        bill_service = BillSerivce(current_user)
+        response, status_code = bill_service.get_bill_users(bill_id)
+
+        return jsonify(response), status_code
+    except Exception as e:
+        return (
+            jsonify({"message": "Unexpected error occurred", "details": str(e)}),
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+        )

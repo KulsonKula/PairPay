@@ -1,5 +1,6 @@
 import logging
 from app import create_app
+from flask_compress import Compress
 
 TRACE_LEVEL_NUM = 1
 
@@ -31,4 +32,5 @@ console_handler.setLevel(logging.INFO)
 
 if __name__ == "__main__":
     app = create_app(config_name="development")
+    Compress(app)
     app.run(host="0.0.0.0", port=5000, debug=True)
