@@ -1,11 +1,12 @@
 from app import db
+from sqlalchemy.dialects.postgresql import UUID
 
 
 class Log(db.Model):
     __tablename__ = "log"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"))
     data = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 

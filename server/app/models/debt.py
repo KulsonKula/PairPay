@@ -1,4 +1,5 @@
 from app import db
+from sqlalchemy.dialects.postgresql import UUID
 
 
 class Debt(db.Model):
@@ -6,8 +7,10 @@ class Debt(db.Model):
     __mapper_args__ = {"confirm_deleted_rows": False}
 
     id = db.Column(db.Integer, primary_key=True)
-    creditor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    debtor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    creditor_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("user.id"), nullable=False
+    )
+    debtor_id = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"), nullable=False)
     amount = db.Column(db.Float, default=0)
     expense_id = db.Column(
         db.Integer, db.ForeignKey("expense.id", ondelete="CASCADE"), nullable=False
