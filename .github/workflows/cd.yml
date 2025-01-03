@@ -29,4 +29,4 @@ jobs:
           context: ./server
           file: ./server/Dockerfile
           push: true
-          tags: "${{ secrets.DOCKER_USERNAME }}/pairpay-backend:${{ github.run_number }}"
+          tags: "pairpay-backend:${{ github.run_number }}"
