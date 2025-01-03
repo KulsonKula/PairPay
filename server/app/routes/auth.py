@@ -52,11 +52,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         link = create_auth_mail(new_user.id)
-        send_mail(
-            subject="Activate your account!",
-            recipients=mail,
-            body=f"Click link to acctivate your account:\n {link}",
-        )
+        # send_mail(
+        #     subject="Activate your account!",
+        #     recipients=mail,
+        #     body=f"Click link to acctivate your account:\n {link}",
+        # )
         return jsonify({"msg": "User successfully registered"}), HTTPStatus.CREATED
 
     except Exception as e:
@@ -83,8 +83,8 @@ def login():
 
     if user and check_password_hash(user.password, password):
         logger.info(user.id)
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         return (
             jsonify(
                 access_token=access_token,
@@ -101,7 +101,7 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     current_user = get_jwt_identity()
-    access_token = create_access_token(identity=current_user)
+    access_token = create_access_token(identity=str(current_user))
     return jsonify(access_token=access_token)
 
 
