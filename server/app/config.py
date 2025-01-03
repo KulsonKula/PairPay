@@ -11,7 +11,11 @@ class Config:
         self.env = env
         self.SECRET_KEY = os.getenv("SECRET_KEY")
         self.CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
-        self.CORS_ORIGINS = ["http://localhost:5173", "http://localhost:4173"]
+        self.CORS_ORIGINS = [
+            "http://localhost:5173",
+            "http://localhost:4173",
+            "http://localhost:80",
+        ]
         self.CORS_METHODS = ["GET", "POST", "PUT", "DELETE"]
         self.MAX_CONTENT_LENGTH = 50 * 1024 * 1024
         self.SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
@@ -19,6 +23,7 @@ class Config:
         self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
         self.JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
         self.JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+        # self.JWT_VERIFY_SUB = False
 
         # Konfiguracja e-mail
         self.MAIL_SERVER = "smtp.gmail.com"
