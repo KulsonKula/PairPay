@@ -78,8 +78,8 @@ def login():
 
     user = User.query.filter_by(mail=mail).first()
 
-    if user.is_activated != True:
-        return jsonify({"message": "Verify your email"}), HTTPStatus.UNAUTHORIZED
+    # if user.is_activated != True:
+    #     return jsonify({"message": "Verify your email"}), HTTPStatus.UNAUTHORIZED
 
     if user and check_password_hash(user.password, password):
         logger.info(user.id)
