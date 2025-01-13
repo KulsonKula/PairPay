@@ -16,7 +16,7 @@ class Config:
             "http://localhost:4173",
             "http://localhost:80",
         ]
-        self.CORS_METHODS = ["GET", "POST", "PUT", "DELETE"]
+        self.CORS_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         self.MAX_CONTENT_LENGTH = 50 * 1024 * 1024
         self.SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
         self.SQLALCHEMY_TRACK_MODIFICATIONS = False
