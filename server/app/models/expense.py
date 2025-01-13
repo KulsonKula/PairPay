@@ -11,7 +11,7 @@ class ExpenseParticipant(db.Model):
     expense_id = db.Column(
         db.Integer, db.ForeignKey("expense.id", ondelete="CASCADE"), nullable=False
     )
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     amount_owed = db.Column(db.Float, nullable=False)
 
     expense = db.relationship("Expense", back_populates="participants")
@@ -26,7 +26,7 @@ class Expense(db.Model):
     name = db.Column(db.String, nullable=False)
     currency = db.Column(db.String, nullable=False, default="USD")
     price = db.Column(db.Float, nullable=False)
-    payer = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"), nullable=False)
+    payer = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     bill_id = db.Column(
         db.Integer, db.ForeignKey("bill.id", ondelete="CASCADE"), nullable=False
     )

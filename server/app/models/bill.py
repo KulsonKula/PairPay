@@ -14,7 +14,7 @@ bill_user = db.Table(
     ),
     db.Column(
         "user_id",
-        UUID(as_uuid=True),
+        db.Integer,
         db.ForeignKey("user.id", ondelete="CASCADE"),
         primary_key=True,
     ),
@@ -25,9 +25,7 @@ class Bill(db.Model):
     __tablename__ = "bill"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    user_creator_id = db.Column(
-        UUID(as_uuid=True), db.ForeignKey("user.id"), nullable=False
-    )
+    user_creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String, nullable=False)
     label = db.Column(db.String, nullable=True)
     status = db.Column(db.Integer, nullable=False, default=1)

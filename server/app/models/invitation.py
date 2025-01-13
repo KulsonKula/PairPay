@@ -15,8 +15,8 @@ class Invitation(db.Model):
     __tablename__ = "invitation"
 
     id = db.Column(db.Integer, primary_key=True)
-    inviter_id = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"), nullable=False)
-    invitee_id = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"), nullable=False)
+    inviter_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    invitee_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     bill_id = db.Column(db.Integer, db.ForeignKey("bill.id"), nullable=False)
     status = db.Column(
         Enum(InvitationStatus), default=InvitationStatus.PENDING, nullable=False
