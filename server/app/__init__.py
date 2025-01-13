@@ -30,7 +30,7 @@ class AppFactory:
             self.app,
             resources={
                 r"/*": {
-                    "origins": self.app.config["CORS_ORIGINS"],
+                    "origins": "*",
                     "methods": self.app.config["CORS_METHODS"],
                     "allow_headers": self.app.config["CORS_ALLOW_HEADERS"],
                 }
