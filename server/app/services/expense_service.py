@@ -68,10 +68,10 @@ class ExpenseService:
             if not bill:
                 return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
 
-            # if not self._is_user_participant(bill):
-            #     return {
-            #         "message": "User is not a participant of the bill"
-            #     }, HTTPStatus.FORBIDDEN
+            if not self._is_user_participant(bill):
+                return {
+                    "message": "User is not a participant of the bill"
+                }, HTTPStatus.FORBIDDEN
 
             required_fields = ["name", "currency", "price", "payer"]
             for field in required_fields:
@@ -222,7 +222,9 @@ class ExpenseService:
             db.session.commit()
 
     def _is_user_participant(self, bill):
-        return (
-            self.current_user in [user.id for user in bill.users]
-            or self.current_user == bill.user_creator_id
-        )
+        user_id = int(self.current_user)
+        participants = [int(user.id) for user in bill.users] + [
+            int(bill.user_creator_id)
+        ]
+        is_participant = user_id in participants
+        return is_participant
