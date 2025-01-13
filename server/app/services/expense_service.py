@@ -68,10 +68,10 @@ class ExpenseService:
             if not bill:
                 return {"message": "Bill not found"}, HTTPStatus.NOT_FOUND
 
-            if not self._is_user_participant(bill):
-                return {
-                    "message": "User is not a participant of the bill"
-                }, HTTPStatus.FORBIDDEN
+            # if not self._is_user_participant(bill):
+            #     return {
+            #         "message": "User is not a participant of the bill"
+            #     }, HTTPStatus.FORBIDDEN
 
             required_fields = ["name", "currency", "price", "payer"]
             for field in required_fields:
