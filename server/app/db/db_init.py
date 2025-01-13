@@ -48,6 +48,7 @@ def init_db():
             "alice@gmail.com",
             generate_password_hash("securepass"),
             True,
+            True,
         )
         user2 = create_user(
             "Bob", "Jones", "bob@gmail.com", generate_password_hash("anotherpass"), True
