@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, app, request
 from flask_cors import CORS
 from app.config import config_by_name
 from app.db import db
@@ -36,6 +36,21 @@ class AppFactory:
                 }
             },
         )
+
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            response = Flask.make_response("", 204)
+            response.headers["Access-Control-Allow-Origin"] = request.headers.get(
+                "Origin", "*"
+            )
+            response.headers["Access-Control-Allow-Methods"] = (
+                "GET, POST, PUT, DELETE, OPTIONS"
+            )
+            response.headers["Access-Control-Allow-Headers"] = (
+                "Content-Type, Authorization"
+            )
+            return response
 
     def _register_blueprints(self):
         self.app.register_blueprint(auth_bp)
