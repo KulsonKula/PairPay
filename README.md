@@ -1,7 +1,7 @@
 # PairPay
 
-## Description
-This project implements a server-side application designed to handle a web application for splitting the costs of group shopping.
+## Opis
+Ten projekt implementuje aplikację po stronie serwera, zaprojektowaną do obsługi aplikacji internetowej do podziału kosztów grupowych zakupów.
 
 ## Instrukcja instalacji
 
@@ -21,24 +21,23 @@ This project implements a server-side application designed to handle a web appli
    python main.py
    ```
 
-To set up with Docker:
-1. Build the Docker image:
+Aby skonfigurować za pomocą Dockera:
+1. Zbuduj obraz dockera:
    ```bash
    docker build -t server-app .
    ```
-2. Run the container:
+2. Uruchom kontener:
    ```bash
    docker run -p 8000:8000 server-app
    ```
 
-## Architecture
+## Architekura
 The project has the following structure:
-- `app/`: Contains the application logic and configurations
-- `doc/`: Documentation files
-- `requirements.txt`: Python dependencies
-- `Dockerfile`: Docker configuration
+- `app/`: Logika aplikacji i jej konfiguracja
+- `requirements.txt`: wymagania Pythonowe
+- `Dockerfile`: Konfiguracja dockera
 
-## Authors
+## Autorzy
 - Jakub Kula
 - Paweł Wójtowicz
 - Natalia Stręk
