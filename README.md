@@ -1,5 +1,10 @@
 # PairPay
 
+## Technologie
+[![Python]][python-url]
+![flask]
+![jwt]
+![postgres]
 ## Opis
 Ten projekt implementuje aplikację po stronie serwera, zaprojektowaną do obsługi aplikacji internetowej do podziału kosztów grupowych zakupów.
 
@@ -42,3 +47,11 @@ The project has the following structure:
 - Paweł Wójtowicz
 - Natalia Stręk
   
+[python]: https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue
+[python-url]: https://www.python.org/
+
+[flask]: https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white
+
+[postgres]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
+
+[jwt]: https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white
