@@ -5,6 +5,7 @@
 ![flask]
 ![jwt]
 ![postgres]
+![docker]
 ## Opis
 Ten projekt implementuje aplikację po stronie serwera, zaprojektowaną do obsługi aplikacji internetowej do podziału kosztów grupowych zakupów.
 
@@ -55,3 +56,4 @@ The project has the following structure:
 [postgres]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
 
 [jwt]: https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white
+[docker]: https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white
